@@ -1,17 +1,18 @@
 __author__ = 'unicef-leb-inn'
 
 from datetime import timedelta, datetime
-
+from rest_framework.reverse import reverse
 from django.template.loader import render_to_string
 from django.test import TestCase, Client, RequestFactory
-from rest_framework.test import APIRequestFactory, force_authenticate
+from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
+
 
 from EquiTrack.factories import TripFactory, UserFactory
 from trips.models import Trip
 from trips.views import TripsApprovedView, TripsListApi, TripsByOfficeView, TripActionView
 
 
-class ViewTest(TestCase):
+class ViewTest(APITestCase):
 
     def setUp(self):
         self.client_stub = Client()
@@ -43,14 +44,18 @@ class ViewTest(TestCase):
         self.assertEquals(response.status_code, 200)
 
     def test_view_trips_api_action(self):
-        factory = APIRequestFactory()
+
         user = UserFactory()
-        view = TripsListApi.as_view()
+
         # Make an authenticated request to the view...
-        request = factory.get('/api/' + str(self.trip.id) + '/submit/')
-        force_authenticate(request, user=user)
-        response = view(request)
+        url = reverse('trips_api_action', args=[self.trip.id, 'submitted'])
+
+        # request = factory.post('/api/' + str(self.trip.id) + '/submitted/', {})
+        self.client.force_authenticate(user=self.trip.owner)
+        response = self.client.post(url, {}, format='json')
+
         self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.data.get('status'), 'submitted')
 
     def test_view_trip_action(self):
         factory = APIRequestFactory()
@@ -58,7 +63,7 @@ class ViewTest(TestCase):
         view = TripsByOfficeView.as_view()
         # Make an authenticated request to the view...
         request = factory.get('/offices/')
-        force_authenticate(request, user=user)
+        force_authenticate(request, user=self.trip.owner)
         response = view(request)
         self.assertEquals(response.status_code, 200)
 
