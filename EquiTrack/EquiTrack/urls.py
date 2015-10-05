@@ -9,6 +9,9 @@ autocomplete_light.autodiscover()
 from django.contrib import admin
 admin.autodiscover()
 
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
+
 from .views import (
     MapView,
     DashboardView,
@@ -19,6 +22,13 @@ from .views import (
 
 urlpatterns = patterns(
     '',
+    url(
+        r'^favicon.ico$',
+        RedirectView.as_view(
+            url=staticfiles_storage.url('img/favicon.ico'),
+            permanent=False),
+        name="favicon"
+    ),
     url(r'^$', login_required(UserDashboardView.as_view()), name='dashboard'),
     url(r'^indicators', login_required(DashboardView.as_view()), name='indicator_dashboard'),
     url(r'^map/$', login_required(MapView.as_view()), name='map'),
