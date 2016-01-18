@@ -198,6 +198,8 @@ def crunch_winter_data():
                 '13 years': {"$cond": [{"$eq": ["$child_list.age", "13 years"]}, 1, 0]},
                 '14 years': {"$cond": [{"$eq": ["$child_list.age", "14 years"]}, 1, 0]},
 
+
+
                 'CSC Survey Q1': "$surveys.CSC Survey.Q1.answer",
                 'CSC Survey Q2': "$surveys.CSC Survey.Q2.answer",
                 'CSC Survey Q3': "$surveys.CSC Survey.Q3.answer",

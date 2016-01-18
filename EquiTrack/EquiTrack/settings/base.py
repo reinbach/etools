@@ -172,11 +172,12 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 SLACK_URL = os.environ.get('SLACK_URL')
 
 COUCHBASE_URL = os.environ.get('COUCHBASE_URL')
+
 COUCHBASE_USER = os.environ.get('COUCHBASE_USER')
 COUCHBASE_PASS = os.environ.get('COUCHBASE_PASS')
 
 MONGODB_URL = os.environ.get('MONGODB_URL', 'mongodb://localhost:27017')
-MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'supplies')
+MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'winter')
 ########## END DATABASE CONFIGURATION
 
 ########## MANAGER CONFIGURATION

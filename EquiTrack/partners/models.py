@@ -909,6 +909,9 @@ class SupplyPlan(models.Model):
     )
 
 
+
+
+
 class DistributionPlan(models.Model):
 
     partnership = models.ForeignKey(
