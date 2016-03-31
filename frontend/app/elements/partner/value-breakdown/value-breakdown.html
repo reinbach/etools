@@ -5,6 +5,7 @@
 
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../input-recursive/input-recursive.html">
 
   
@@ -17,8 +18,14 @@
   <template>
 
     <paper-input type="number" label="Total"></paper-input>
-    <template is="dom-if" if="{{breakdowns.breakdown}}">
-      <input-recursive breakdown="{{breakdowns.breakdown}}"></input-recursive>
+      <template is="dom-if" if="{{breakdowns.breakdown}}">
+        <p>
+          <template is="dom-repeat" items="{{disaggregation.order}}">
+            <span on-tap="_selectLevel" data-lvl="{{index}}">{{item}}</span>
+          </template>
+        </p>
+      <p> selected: {{disLevel}} </p>
+      <input-recursive hidden$="{{!disLevel}}" level="{{disLevel}}" mother="" breakdown="{{breakdowns.breakdown}}"></input-recursive>
     </template>
 
    
@@ -39,32 +46,29 @@
     behaviors: [],
     properties: {
       disaggregation: {
-        type: Object,
-        value: {
-          'order': ['Age','Gender','Removed'],
-          'Age': ['0-1','1-2','3-4'],
-          'Gender': ['M', 'F', 'O'],
-          'Removed': ['First', 'Second']
-        }
+        type: Object
       },
       breakdowns: {
         type: Object
+      },
+      disLevel: {
+        type: Number,
+        value: 0
       }
            
       
     },
     ready: function() {
-      this.recursiveMap();
+      this.recursiveMap(this.disaggregation);
     },
     
-    recursiveMap: function(){
-      var d = {
-          'order': ['Age','Gender'],
-          'Age': ['0-1','1-2','3-4'],
-          'Gender': ['M', 'F', 'O']
-        };
+    recursiveMap: function(d){
+      if (!d) { return; }
       var order = d.order;
-      var tempLol = [['0-1','1-2','3-4'],['M', 'F', 'O']];
+      var tempLol = [];
+      order.forEach(function (e){
+        tempLol.push(d[e]);
+      });
 
       var createBDObject = function(name){
         return {
@@ -87,15 +91,15 @@
           }
           return myL;
         } else {
-          
-          var myBreakdown = createBDObject(order[cln]);
-          myBreakdown.children = mr(cln+1, lol.slice(1));
           for (var l in lol[0]){
             myL.push(
               {
                 name: lol[0][l],
                 total: null,
-                breakdown: myBreakdown
+                breakdown: {
+                  breakdownName: order[cln],
+                  children: mr(cln+1, lol.slice(1))
+                }
               }
             );
           }
@@ -106,13 +110,21 @@
     var result = { 
       name: 'total',
       total: null,
-      breakdown: createBDObject(d.order[0])
+      breakdown: {
+        name: order[0],
+        children: mr(1, tempLol)
+      }
     };
-    result.breakdown.children = mr(1, tempLol);
+    //result.breakdown.children = mr(1, tempLol);
     //console.log(result);
     this.breakdowns = result;
     },
-    
+    _selectLevel: function(ev) {
+      this.disLevel = 1 + ev.model.index;
+    },
+    _hidenBreakdowns: function(e) {
+      return e ? false : true;
+    }
     
   });
 })();

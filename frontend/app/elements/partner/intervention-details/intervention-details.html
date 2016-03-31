@@ -164,18 +164,55 @@
   <h1 hidden$="[[!pageLoading]]">
       Page is loading now...
   </h1>
-    <!-- <paper-tabs selected="{{selectedTab}}">
-
-        <paper-tab>Indicators</paper-tab>
+    <paper-tabs selected="{{selectedTab}}">
         <paper-tab>Report</paper-tab>
 
-    </paper-tabs> -->
+        <paper-tab>Indicators</paper-tab>
+        
+    </paper-tabs>
 
    
-   <!--  <iron-pages selected="{{selectedTab}}">
+    <iron-pages selected="{{selectedTab}}">
 
+      <section>
+        <paper-material  elevation="1">
+        <div>
+          <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
+        </div>
+        <hr>
+        <template is="dom-repeat" items="[[outputs]]" as="out">
+          <div class="outputBlock">
+            <p class="outputTitle">[[out.output.name]]</p>
+            <div class="indicatorsBlock">
 
-      <section>  -->
+              <template is="dom-repeat" items="[[out.indicators]]" as="rc">
+                <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
+                <div class="indicatorReportBlock">
+                  <div class="progressBlock">
+                    <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
+                    <p> {{rc.current_progress}}/{{rc.target}}</p>
+                  </div>
+                  <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
+                  <div class="bulkReportIndicator">
+                    <value-breakdown id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
+                    <locations-autocomplete id="locationSelected" label="Location"
+                        autocomplete-url="{{appData.locationsAutocompleteEp}}">
+                    </locations-autocomplete><span>&nbsp;</span>
+                  </div>
+                </div>
+                <br>
+              </template>
+
+            </div>
+          </div>   
+        </template>
+
+        <div class="reportButtons">
+          <paper-button raised disabled={{submitDisabled}}>Submit Report</paper-button>
+        </paper-material>
+      </section>
+
+      <section> 
       <h3>Indicators</h3>
         <paper-material elevation="1">
           <template is="dom-repeat" items="[[outputs]]" as="out">
@@ -204,49 +241,13 @@
             </div>   
           </template>
         </paper-material>
-     <!--  </section>
-
-      <section>
-        <paper-material  elevation="1">
-        <div>
-          <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
-        </div>
-        <hr>
-        <template is="dom-repeat" items="[[outputs]]" as="out">
-          <div class="outputBlock">
-            <p class="outputTitle">[[out.output.name]]</p>
-            <div class="indicatorsBlock">
-
-              <template is="dom-repeat" items="[[out.indicators]]" as="rc">
-                <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
-                <div class="indicatorReportBlock">
-                  <div class="progressBlock">
-                    <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
-                    <p> {{rc.current_progress}}/{{rc.target}}</p>
-                  </div>
-                  <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
-                  <div class="bulkReportIndicator">
-                    <value-breakdown></value-breakdown><span>&nbsp;</span>
-                    <locations-autocomplete id="locationSelected" label="Location"
-                        autocomplete-url="{{appData.locationsAutocompleteEp}}">
-                    </locations-autocomplete><span>&nbsp;</span>
-                  </div>
-                </div>
-                <br>
-              </template>
-
-            </div>
-          </div>   
-        </template>
-
-        <div class="reportButtons">
-          <paper-button raised disabled={{submitDisabled}}>Submit Report</paper-button>
-        </paper-material>
       </section>
 
       
 
-    </iron-pages> -->
+      
+
+    </iron-pages>
   
   
 
