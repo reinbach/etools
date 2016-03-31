@@ -20,26 +20,41 @@
 
 <dom-module id="input-recursive">
   <style is="custom-style" include="iron-flex iron-flex-alignment">
+    :host {
+      --paper-input-container: {
+        width: 4em;
+      }
+    };
     div {
       padding-left: 10px;
     }
     .motherInput {
 
     }
+     .hiddenInputLabel {
+        font-size: 80%;
+        color: var(--secondary-text-color);
+
+      }
   </style>
   <template>
   <div class="layout horizontal wrap">
-    <!-- <p>{{breakdown.breakdownName}}</p> -->
+    
     
     <template is="dom-repeat" items="{{breakdown.children}}">
       <div>
         <paper-input 
               class="motherInput"
+              always-float-label="{{hiddenChildren(level)}}"
               type="number" 
-              label="{{_getLabel(item.name)}}"
+              min="0"
+              maxlength="7"
+              label="{{item.name}}"
               value="{{item.total}}" 
-              disabled="{{!hiddenChildren(level)}}">
+              disabled="{{!hiddenChildren(level)}}"
+              hidden$="{{!hiddenChildren(level)}}">
         </paper-input>
+        <p hidden$="{{hiddenChildren(level)}}"><span class="hiddenInputLabel">{{_getLabel(item.name)}}: </span> <span class="hiddenInputTotal">{{item.total}}</span></p>
         <template is="dom-if" if="{{item.breakdown}}">
           <input-recursive 
                 level="[[_decrement(level)]]" 
@@ -113,8 +128,11 @@
       
     },
     _getLabel: function(el) {
-      return [this.mother, this.breakdown.breakdownName, el].join(' ');
+      return [this.mother, el].join(' | ');
     },
+    // _getInputLabel: function(el) {
+    //   return el //[this.breakdown.breakdownName, el].join(' ');
+    // },
     _decrement: function(n) {
       return ((n-1)>0) ? n-1 : 0;
     },
@@ -127,7 +145,7 @@
         var elements = Array.from(this.querySelectorAll('.motherInput'));
         elements.forEach(function(el) {
           el.value = null;
-        })
+        });
       }
     }
 

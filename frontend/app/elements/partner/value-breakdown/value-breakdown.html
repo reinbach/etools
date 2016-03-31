@@ -13,6 +13,7 @@
 
 <dom-module id="value-breakdown">
   <style>
+
   
   </style>
   <template>
@@ -21,11 +22,12 @@
       <template is="dom-if" if="{{breakdowns.breakdown}}">
         <p>
           <template is="dom-repeat" items="{{disaggregation.order}}">
-            <span on-tap="_selectLevel" data-lvl="{{index}}">{{item}}</span>
+            <span on-tap="_selectLevel" data-lvl="{{index}}">{{_computeItem(index)}}</span> |
           </template>
         </p>
       <p> selected: {{disLevel}} </p>
-      <input-recursive hidden$="{{!disLevel}}" level="{{disLevel}}" mother="" breakdown="{{breakdowns.breakdown}}"></input-recursive>
+
+      <input-recursive hidden$="{{!disLevel}}" level="{{disLevel}}" breakdown="{{breakdowns.breakdown}}"></input-recursive>
     </template>
 
    
@@ -70,12 +72,6 @@
         tempLol.push(d[e]);
       });
 
-      var createBDObject = function(name){
-        return {
-          breakdownName: name,
-          children: []
-        };
-      };
       var mr = function(cln, lol) {
         var myL = [];
         if (lol.length === 1) {
@@ -111,7 +107,7 @@
       name: 'total',
       total: null,
       breakdown: {
-        name: order[0],
+        breakdownName: order[0],
         children: mr(1, tempLol)
       }
     };
@@ -124,6 +120,13 @@
     },
     _hidenBreakdowns: function(e) {
       return e ? false : true;
+    },
+    _computeItem: function(index) {
+      var myDis = [];
+      for (var i=0; i<=index; i++){
+        myDis.push(this.disaggregation.order[i]);
+      }
+      return myDis.join(' + ');
     }
     
   });
