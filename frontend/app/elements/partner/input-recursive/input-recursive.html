@@ -128,7 +128,7 @@
       
     },
     _getLabel: function(el) {
-      return [this.mother, el].join(' | ');
+      return this.mother ? [this.mother, el].join(' | ') : el;
     },
     // _getInputLabel: function(el) {
     //   return el //[this.breakdown.breakdownName, el].join(' ');

@@ -1,20 +1,23 @@
 
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../../../bower_components/paper-material/paper-material.html">
-
-
-<link rel="import" href="../../common/locations-autocomplete/locations-autocomplete.html">
-<link rel="import" href="../../common/timeframe-picker/timeframe-picker.html">
-<link rel="import" href="../value-breakdown/value-breakdown.html">
-
-<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../../common/etools-ajax/etools-ajax.html">
+<link rel="import" href="../../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../bower_components/iron-list/iron-list.html">
+
 <link rel="import" href="../../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../bower_components/paper-card/paper-card.html">
+
+<link rel="import" href="../../common/etools-ajax/etools-ajax.html">
+<link rel="import" href="../../common/locations-autocomplete/locations-autocomplete.html">
+<link rel="import" href="../../common/timeframe-picker/timeframe-picker.html">
+
+<link rel="import" href="../value-breakdown/value-breakdown.html">
+
+
 <link rel="import" href="../../behaviors/common/utils.html">
 
 
@@ -43,6 +46,11 @@
   .bulkReportIndicator {
     @apply(--layout-horizontal);
   }
+  .bulkReportIndicator-d {
+    @apply(--layout-vertical);
+    @apply(--layout-start);
+  }
+
   .progressBlock {
     @apply(--layout-horizontal);
     @apply(--layout-center);
@@ -85,55 +93,67 @@
     --paper-progress-active-color: var(--paper-light-green-500);
     --paper-progress-secondary-color: var(--paper-light-green-100);
   }
-      iron-list {
-        padding-top: 1px;
-        padding-bottom: 16px;
-        -webkit-flex: 1 1;
-        flex: 1 1;
-        --iron-list-items-container: {
-          max-width: 800px;
-          margin: auto;
-          margin-top: 20px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
-        };
-      }
-      .item {
-        @apply(--layout-horizontal);
-        padding: 20px;
-        background-color: white;
-        border: 1px solid #ddd;
-        cursor: pointer;
-        margin-bottom: 10px;
-      }
-      .pad {
-        padding: 0 16px;
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-      }
-      .primary {
-        font-size: 16px;
-        font-weight: bold;
-      }
-      .shortText, .longText {
-        font-size: 14px;
-      }
-      .spacer {
-        @apply(--layout-flex);
-      }
-      .item-body{
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-      }
-      .item-icon {
-        @apply(--layout-flex);
-        @apply(--layout-vertical);
-      }
-      .intLabel {
-        font-size: 80%;
-        color: var(--secondary-text-color);
+  iron-list {
+    padding-top: 1px;
+    padding-bottom: 16px;
+    -webkit-flex: 1 1;
+    flex: 1 1;
+    --iron-list-items-container: {
+      max-width: 800px;
+      margin: auto;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    };
+  }
+  .item {
+    @apply(--layout-horizontal);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .pad {
+    padding: 0 16px;
+    @apply(--layout-flex);
+    @apply(--layout-vertical);
+  }
+  .primary {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .shortText, .longText {
+    font-size: 14px;
+  }
+  .spacer {
+    @apply(--layout-flex);
+  }
+  .item-body{
+    @apply(--layout-flex);
+    @apply(--layout-vertical);
+  }
+  .item-icon {
+    @apply(--layout-flex);
+    @apply(--layout-vertical);
+  }
+  .intLabel {
+    font-size: 80%;
+    color: var(--secondary-text-color);
 
-      }
+  }
+  .reportButtons{
+    @apply(--layout-vertical);
+    @apply(--layout-end);
+  }
+  paper-button.green {
+    background-color: var(--paper-green-500);
+    color: white;
+  }
+  paper-button.red {
+    background-color: var(--paper-red-500);
+    color: white;
+  }
   </style>
     <etools-ajax
           auto
@@ -145,6 +165,11 @@
           loading="{{pageLoading}}">
     </etools-ajax>
 
+  <h1 hidden$="[[!pageLoading]]">
+      Page is loading now...
+  </h1>
+
+  <span hidden$="[[pageLoading]]">
   <h2>{{intervention.title}}</h2>
   <h3>Details</h3>
   <paper-material elevation="1">
@@ -161,58 +186,68 @@
       <span class="intLabel">Partner Contribution:</span> {{intervention.partner_contribution_budget}}
     </p>
   </paper-material>
-  <h1 hidden$="[[!pageLoading]]">
-      Page is loading now...
-  </h1>
-    <paper-tabs selected="{{selectedTab}}">
+
+  
+    <!-- <paper-tabs selected="{{selectedTab}}">
         <paper-tab>Report</paper-tab>
 
         <paper-tab>Indicators</paper-tab>
         
-    </paper-tabs>
+    </paper-tabs> -->
 
-   
+   <!-- 
     <iron-pages selected="{{selectedTab}}">
 
-      <section>
-        <paper-material  elevation="1">
-        <div>
-          <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
-        </div>
-        <hr>
-        <template is="dom-repeat" items="[[outputs]]" as="out">
-          <div class="outputBlock">
-            <p class="outputTitle">[[out.output.name]]</p>
-            <div class="indicatorsBlock">
+      <section> -->
+  <h3>Indicators</h3>
+  <paper-material  elevation="1">
+  <div class="reportButtons">
+    <paper-button raised class$="{{_reportButton(reportingActive)}}" on-tap="_toggleReport">
+      <iron-icon icon="{{_reportIcon(reportingActive)}}"></iron-icon>Report
+    </paper-button>
+  </div>
+  <div hidden$="[[reportingActive]]">
+    <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
+  </div>
+  <hr hidden$="[[reportingActive]]">
+  <template is="dom-repeat" items="[[outputs]]" as="out">
+    <div class="outputBlock">
+      <p class="outputTitle">[[out.output.name]]</p>
+      <div class="indicatorsBlock">
 
-              <template is="dom-repeat" items="[[out.indicators]]" as="rc">
-                <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
-                <div class="indicatorReportBlock">
-                  <div class="progressBlock">
-                    <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
-                    <p> {{rc.current_progress}}/{{rc.target}}</p>
-                  </div>
-                  <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
-                  <div class="bulkReportIndicator">
-                    <value-breakdown id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
-                    <locations-autocomplete id="locationSelected" label="Location"
-                        autocomplete-url="{{appData.locationsAutocompleteEp}}">
-                    </locations-autocomplete><span>&nbsp;</span>
-                  </div>
+        <template is="dom-repeat" items="[[out.indicators]]" as="rc">
+          <div>
+              <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
+              <div class="indicatorReportBlock">
+                <div class="progressBlock">
+                  <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
+                  <p> {{rc.current_progress}}/{{rc.target}}</p>
                 </div>
-                <br>
-              </template>
-
-            </div>
-          </div>   
+                <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
+                <div hidden$="[[reportingActive]]" class$="{{_getClass(rc.disaggregation)}}">
+                  <locations-autocomplete class="reportInput" id="locationSelected" label="Location"
+                      autocomplete-url="{{appData.locationsAutocompleteEp}}">
+                  </locations-autocomplete><span>&nbsp;</span>
+                  <value-breakdown class="reportInput" id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
+                  
+                </div>
+              </div>
+          </div>
+          <hr hidden$="[[reportingActive]]">
         </template>
 
-        <div class="reportButtons">
-          <paper-button raised disabled={{submitDisabled}}>Submit Report</paper-button>
-        </paper-material>
-      </section>
+      </div>
+    </div>   
+  </template>
 
-      <section> 
+  <div hidden$="[[reportingActive]]" class="reportButtons">
+    <paper-button raised disabled={{submitDisabled}}>Submit Report</paper-button>
+  </div>
+  </paper-material>
+      
+      <!-- </section> -->
+
+      <!-- <section> 
       <h3>Indicators</h3>
         <paper-material elevation="1">
           <template is="dom-repeat" items="[[outputs]]" as="out">
@@ -241,15 +276,11 @@
             </div>   
           </template>
         </paper-material>
-      </section>
+      </section> -->
+     <!--  
 
-      
-
-      
-
-    </iron-pages>
-  
-  
+    </iron-pages> -->
+  </span>
 
   </template>
 
@@ -295,6 +326,10 @@
       url: {
         type: String,
         value: null
+      },
+      reportingActive: {
+        type: Boolean,
+        value: true
       }
     },
     changeUrl: function(){
@@ -343,7 +378,7 @@
     },
     handleResponse: function(rsp) {
       // handle the response from the server
-      this.intervention = rsp.detail.xhr.response;
+      this.intervention = rsp.detail;
     },
     _emptyObject: function(obj) {
       // for validation return false if object has no keys
@@ -357,6 +392,18 @@
               value: obj[key]
           };
       });
+    },
+    _toggleReport: function() {
+      this.reportingActive = !this.reportingActive;
+    },
+    _getClass: function(disaggregation){
+      return disaggregation ? 'bulkReportIndicator-d' : 'bulkReportIndicator';
+    },
+    _reportButton: function(v){
+      return v ? 'green' : 'red';
+    },
+    _reportIcon: function(v) {
+      return v ? 'check' : 'clear';
     }
   });
 })();

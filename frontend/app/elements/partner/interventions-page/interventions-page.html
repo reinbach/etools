@@ -138,11 +138,11 @@ Example:
       }
     },
     ready: function(){
-      this.url = this.appData.interventionsEp;
+      this.$.ajax.endpoint = {ep: 'interventions'};
     },
 
     handleResponse: function(rsp) {
-      this.interventions = rsp.detail.xhr.response;
+      this.interventions = rsp.detail;
     },
 
     _goToIntervention: function(e){

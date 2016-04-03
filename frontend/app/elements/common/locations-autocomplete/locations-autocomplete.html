@@ -149,7 +149,7 @@
     handleResponse: function(rsp) {
       var collapse = this.$.collapse;
       this.loadingValues = false;
-      this.choices = rsp.detail.xhr.response;
+      this.choices = rsp.detail;
       this.$.resultList.render();
       if (!collapse.opened && this.choices){
         collapse.toggle();

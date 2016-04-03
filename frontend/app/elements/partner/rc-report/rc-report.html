@@ -250,16 +250,16 @@
     },
     handleResponse: function(rsp) {
       //
-      this.rc = rsp.detail.xhr.response;
+      this.rc = rsp.detail;
       this.indicatorReports = this.rc.indicator_reports;
       console.log(this.rc);
 
     },
     handleSubmitResponse: function(rsp){
-      console.log('handling submit', rsp.detail.xhr.response);
-      this.set('indicatorReports', this.rc.indicator_reports.concat([rsp.detail.xhr.response]));
-      this.rc.indicator_reports.push(rsp.detail.xhr.response);
-      this.set('rc.current_progress', (this.rc.current_progress + rsp.detail.xhr.response.total));
+      console.log('handling submit', rsp.detail);
+      this.set('indicatorReports', this.rc.indicator_reports.concat([rsp.detail]));
+      this.rc.indicator_reports.push(rsp.detail);
+      this.set('rc.current_progress', (this.rc.current_progress + rsp.detail.total));
     },
     handleSubmitError: function(rsp) {
       console.log(rsp.detail.error);

@@ -2,6 +2,8 @@
 
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../behaviors/common/utils.html">
+
 
 <!--
 An element providing a solution to no problem in particular.
@@ -41,6 +43,7 @@ Example:
   'use strict';
   Polymer({
     is: 'etools-ajax',
+    behaviors: [commonBv.globals],
     properties: {
       authToken: {
         type: String,
@@ -66,6 +69,11 @@ Example:
         type: String,
         value: null,
         observer: '_prepareRequest'
+      },
+      ep: Object,  // local endpoint as returned by getEp
+      endpoint: {
+        type: Object,
+        observer: '_endpointChanged'
       }
     },
 
@@ -92,7 +100,20 @@ Example:
         // this._handleUnexpectedResponse();
         return;
       }
-      this.fire('response', rsp.detail, {bubbles: false});
+      // console.log('detail here', rsp.detail.xhr.response)
+      if (this.ep && this.ep.exp){
+        var localVal = {
+          detail: rsp.detail.xhr.response,
+          exp: this.ep.exp + Date.now(),
+        };
+        window.localStorage.setItem(this.ep.url, 
+          JSON.stringify(localVal)
+        );
+      }
+      // TODO: check if endpoint should be in localstorage
+        // TODO: if true place response in localstorage + expiration time (expiration time should be taken based on each endpoint)
+
+      this.fire('response', rsp.detail.xhr.response, {bubbles: false});
     },
     _getCSRFCookie: function() {
       var name = 'csrftoken';
@@ -122,7 +143,7 @@ Example:
       }
       this.$.customAjax.url = newUrl;
     },
-    sendPostRequest: function(){
+    sendPostRequest: function() {
       console.log('unsafe method', this.method);
       var csrfToken = this._getCSRFCookie();
       this.$.customAjax.auto=false;
@@ -135,6 +156,29 @@ Example:
       this.$.customAjax.generateRequest();
       return;
     },
+    _endpointChanged: function(newEndpoint) {
+
+      if (!Object.keys(newEndpoint)) {
+        return;
+      }
+      var now = Date.now();
+
+      this.ep = this.getEp(newEndpoint.ep, newEndpoint.data);
+      // Check if endpoint should be in localstorage,
+      if (this.ep.exp){
+        //  Try to get info from localstorage
+        var rsp = JSON.parse(window.localStorage.getItem(this.ep.url) || null);
+        if ((rsp) && ((rsp.exp-now) > 0)) {
+          // else fire response where rsp.detail is the info from localstorage
+          this.fire('response', rsp.detail, {bubbles: false});
+        } else {
+          // If expired shoot a new request
+          this.$.customAjax.url = this.ep.url;
+        }
+      } else {
+        this.$.customAjax.url = this.ep.url;
+      }
+    }
 
     
   });
