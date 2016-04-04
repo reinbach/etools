@@ -1,0 +1,149 @@
+
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+
+<link rel="import" href="../../behaviors/common/utils.html">
+<link rel="import" href="../interventions-data/interventions-data.html">
+
+<link rel="import" href="../../behaviors/common/utils.html">
+
+<dom-module id="reporting-dash">
+  <template>
+  <style>
+  :host {
+    
+  }
+  iron-list {
+        padding-top: 1px;
+        padding-bottom: 16px;
+        -webkit-flex: 1 1;
+        flex: 1 1;
+        --iron-list-items-container: {
+          max-width: 800px;
+          margin: auto;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          border-bottom: 1px solid #ddd;
+        };
+      }
+      .item {
+        @apply(--layout-horizontal);
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      .pad {
+        padding: 0 16px;
+        @apply(--layout-flex);
+        @apply(--layout-vertical);
+      }
+  .custom {
+    --primary-background-color: #FFFFFF;
+    min-width: 400px;
+    width: 60%;
+  }
+  :root {
+      --paper-tab-ink: var(--default-primary-color);
+
+      /* custom CSS property */
+      --paper-tabs-selection-bar-color: blue;
+
+      /* custom CSS mixin */
+      --paper-tabs: {
+          color: var(--default-primary-color); /* variable defined in default-theme.html */
+      }
+  }
+
+   
+  </style>
+  <!-- Add indicator toggle -->
+
+  <!-- Add indicator wizzard -->
+  <div class="reportBtn">
+     <paper-button  on-tap="showNewIndicatorDialog" raised>Add Report</paper-button>
+  </div>
+  <paper-dialog class="custom" id="newIndicatorDialog" modal on-iron-overlay-closed="dismissDialog">
+    <p>Add New Indicator: </p>
+    
+    <paper-dialog-scrollable>
+      <div id="interventionChoices">
+        <iron-list id="list" items="[[interventions]]" as="item">
+          <template>
+            <div class="item"  on-tap="_goToInterventionIndicators" tabindex="0">
+                <div class="pad">
+                  
+                  <div class="primary">[[item.title]]</div>
+                  
+                  
+                  <div class="shortText">
+                    <p>Status: [[underscoreless(item.status)]]</p>
+                    <p>Ending: [[dateFormat(item.end_date, 'LL')]]</p>
+                  </div>
+
+                </div>
+                <iron-icon icon="icons:chevron-right"></iron-icon>
+            </div>
+          </template>
+        </iron-list>
+      </div>
+     <!--  <div id="indicatorChoices">
+        <template is="dom-repeat" items="[[interventionIndicators]]" as="rc">
+          <div class="indicator">
+              <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
+              <div class="indicatorReportBlock">
+                <div class="progressBlock">
+                  <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
+                  <p> {{rc.current_progress}}/{{rc.target}}</p>
+                </div>
+                <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
+              </div>
+          </div>
+        </template>
+      </div> -->
+    </paper-dialog-scrollable>
+
+    <div class="buttons">
+      <paper-button dialog-dismiss>Cancel</paper-button>
+      <paper-button dialog-confirm>Add</paper-button>
+    </div>
+      
+  </paper-dialog>
+
+  <!-- End Add indicator wizzard -->
+
+  <!-- Display indicators founds in localstorage -->
+
+  <interventions-data id="interventionData" interventions={{interventions}}></interventions-data>
+    <div> here you are </div>
+
+
+  </template>
+
+</dom-module>
+
+
+<script>
+(function() {
+    // jscs:disable
+  'use strict';
+  Polymer({
+    is: 'reporting-dash',
+    behaviors: [commonBv.utils],
+    properties: {
+      interventions: {
+        type: Object
+      }
+    
+    },
+    ready: function() {
+      console.log('reporting dash ready');
+    },
+    showNewIndicatorDialog: function() {
+      this.$.newIndicatorDialog.toggle();
+    },
+  });
+})();
+
+</script>
