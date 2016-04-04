@@ -14,73 +14,50 @@ commonBv.utils = {
     return s.replace('_',' ');
   }
 };
+var config = {
+  endpoints: {
+    logout: {
+      template: '/accounts/logout/'
+    },
+    userInfo: {
+      template: '/users/api/profile/'
+    },
+    partnerStaffMemberProfile: {
+      template: '/partnership/partnerstaffmember/'
+    },
+    locationsAutocomplete: {
+      template: '/locations/autocomplete/'
+    },
+    interventionDetails: {
+      template: '/api/interventions/<%=id%>/'
+    },
+    interventions: {
+      template: '/api/interventions/',
+      exp: 9000
+    },
+    resultChainDetails: {
+      template: '/api/interventions/<%=interventionId%>/results/<%=rcId%>/'
+    },
+    newIndicatorReport: {
+      template: '/api/interventions/<%=interventionId%>/results/<%=rcId%>/reports'
+    }
+  },
+  permissions: {
+    partnerOnlyPermissions: ['interventionsMenu'],
+    defaultPermissions: ['loggedInDefault','userInfoMenu'],
+    partnerPermissions: ['interventionsMenu'],
+    managementPermissions: ['statsMenu']
+  }
+};
 
 commonBv.globals = {
     baseSite: window.location.origin,
-    _path: function() {
-        return Array.from(arguments).join('/') + '/';
-    },
     getEp: function(ep, data) {
-      switch (ep) {
-        case 'logout':
-          return {
-            url: this._path(this.baseSite, 'accounts/logout')
-          };
-        case 'userInfo':
-          return {
-            url: this._path(this.baseSite, 'users', 'api', 'profile')
-          };
-        case 'partnerStaffMemberProfile':
-          return {
-            url: this._path(this.baseSite, 'partnership/partnerstaffmember')
-          };
-        case 'interventions':
-          return {
-            url: this._path(this.baseSite, 'api', 'interventions'),
-            exp: 9000 //in miliseconds
-          };
-        case 'locationsAutocomplete':
-          return {
-            url: this._path(this.baseSite, 'locations/autocomplete')
-          };
-
-        // case 'userProperties':
-        //   return this._path(this.baseSite, 'partners', 'api', 'profile', data.id);
-        case 'interventionDetails':
-          return {
-            url: this._path(this.baseSite, 'api', 'interventions', data.id)
-          };
-        case 'resultChainDetails':
-          return { 
-            url: this._path(
-                  this.baseSite, 
-                  'api', 
-                  'interventions', 
-                  data.interventionId, 
-                  'results', 
-                  data.rcId
-                ),
-            exp: 3000 //in miliseconds
-          };
-        case 'newIndicatorReport':
-          return {
-            url: this._path(
-                  this.baseSite,
-                  'api', 
-                  'interventions', 
-                  data.interventionId, 
-                  'results', 
-                  data.rcId,
-                  'reports'
-                )
-          };
-      }
+      return {
+        url: this.baseSite + _.template(config.endpoints[ep].template)(data),
+        exp: config.endpoints[ep].exp
+      };
     },
-    permissions: {
-      partnerOnlyPermissions: ['interventionsMenu', 'userInfoMenu'],
-      defaultPermissions: ['userInfoMenu'],
-      partnerPermissions: ['interventionsMenu'],
-      managementPermissions: ['statsMenu']
-    }
+    allPermissions: config.permissions
 };
 </script>

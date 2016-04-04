@@ -19,7 +19,7 @@
 
 
 <link rel="import" href="../../behaviors/common/utils.html">
-
+<link rel="import" href="../interventions-data/interventions-data.html">
 
 <dom-module id="intervention-details">
   <template>
@@ -155,15 +155,8 @@
     color: white;
   }
   </style>
-    <etools-ajax
-          auto
-          id="ajax"
-          url="[[url]]"
-          handle-as="json"
-          on-response="handleResponse"
-          debounce-duration="300"
-          loading="{{pageLoading}}">
-    </etools-ajax>
+  <interventions-data id="interventionData" details="true" intervention={{intervention}}></interventions-data>
+    
 
   <h1 hidden$="[[!pageLoading]]">
       Page is loading now...
@@ -187,18 +180,6 @@
     </p>
   </paper-material>
 
-  
-    <!-- <paper-tabs selected="{{selectedTab}}">
-        <paper-tab>Report</paper-tab>
-
-        <paper-tab>Indicators</paper-tab>
-        
-    </paper-tabs> -->
-
-   <!-- 
-    <iron-pages selected="{{selectedTab}}">
-
-      <section> -->
   <h3>Indicators</h3>
   <paper-material  elevation="1">
   <div class="reportButtons">
@@ -210,13 +191,13 @@
     <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
   </div>
   <hr hidden$="[[reportingActive]]">
-  <template is="dom-repeat" items="[[outputs]]" as="out">
+  <template is="dom-repeat" id="indicatorsList" items="[[outputs]]" as="out">
     <div class="outputBlock">
       <p class="outputTitle">[[out.output.name]]</p>
       <div class="indicatorsBlock">
 
         <template is="dom-repeat" items="[[out.indicators]]" as="rc">
-          <div>
+          <div class="indicator">
               <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
               <div class="indicatorReportBlock">
                 <div class="progressBlock">
@@ -241,45 +222,10 @@
   </template>
 
   <div hidden$="[[reportingActive]]" class="reportButtons">
-    <paper-button raised disabled={{submitDisabled}}>Submit Report</paper-button>
+    <paper-button raised class="green" disabled={{submitDisabled}}>Submit Report</paper-button>
   </div>
   </paper-material>
-      
-      <!-- </section> -->
-
-      <!-- <section> 
-      <h3>Indicators</h3>
-        <paper-material elevation="1">
-          <template is="dom-repeat" items="[[outputs]]" as="out">
-            <div class="outputBlock">
-              <p class="outputTitle">[[out.output.name]]</p>
-              <iron-list id="list" items="[[out.indicators]]" as="rc">
-                <template>
-                    <div class="item"  on-tap="_goToReport" rc-id="{{rc.id}}" tabindex="0">
-                        <div class="pad">
-                          
-                          <div class="primary">{{rc.indicator.name}}</div>
-                          
-                          
-                          <div class="shortText">
-                            <div class="progressBlock">
-                              <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
-                              <p> {{rc.current_progress}}/{{rc.target}}</p>
-                            </div>
-                          </div>
-
-                        </div>
-                        <iron-icon icon="icons:chevron-right"></iron-icon>
-                    </div>
-                </template>
-              </iron-list>
-            </div>   
-          </template>
-        </paper-material>
-      </section> -->
-     <!--  
-
-    </iron-pages> -->
+ 
   </span>
 
   </template>
@@ -304,7 +250,10 @@
         // appData is received from the parent
         value: {}
       },
-      pageLoading: Boolean,
+      pageLoading: {
+        type: Boolean,
+        value: false
+      },
       interventionId: {
         type: Number,
         value: null,
@@ -313,7 +262,7 @@
       intervention: {
         type: Object,
         value: null,
-        observer: '_process_intervention'
+        observer: '_processIntervention'
       },
       indicators: {
         type: Array,
@@ -332,22 +281,20 @@
         value: true
       }
     },
-    changeUrl: function(){
-      if (this.interventionId){
-        this.intervention = null;
-        this.indicators = null;
-        this.url = this.appData.getEndpoint.interventionDetails(this.interventionId);
-      } else {
-        this.url = null;
+    changeUrl: function(id){
+      if (id){
+        this.reportingActive = true;
+        this.$.interventionData.interventionId = this.interventionId;
       }
     },
-    _process_intervention: function(intervention) {
+    _processIntervention: function(intervention) {
         if (!intervention){
           return;
         }
         // need to get a dict of indicators filtered by output;
         var inds = [];
         var tempOutputs = {};
+
         intervention.results.forEach(function(el) {
           // el is the result_chain object
           // Make sure it's an indicator result
@@ -370,6 +317,12 @@
         });
         this.indicators = inds;
         this.outputs = outputs;
+
+        // var elements = Array.from(this.querySelectorAll('.reportInput'));
+        // elements.forEach(function(el) {
+        //   el.render();
+        // });
+        ///
     },
     _goToReport: function(ev){
       // go to the reporting page

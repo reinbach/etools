@@ -40,13 +40,8 @@ Example:
   'use strict';
   Polymer({
     is: 'global-data',
-    //behaviors: [commonBv.globals],
+    behaviors: [commonBv.globals],
     properties: {
-      appData: {
-        type: Object,
-        // appData is received from the parent
-        value: {}
-      },
       user: {
         type: Object,
         notify: true,
@@ -59,10 +54,6 @@ Example:
       }
     },
     ready: function() {
-      // console.log(this.appData);
-      // console.log(this.appData.getEndpoint.userProperties(2));
-      // TODO: fire the ajax request at this point
-      // this.userUrl = this.appData.userInfoEp;
       this.$.ajax.endpoint = {ep: 'userInfo'};
     },
     _setDefaultUser: function(){
@@ -118,27 +109,33 @@ Example:
     },
 
     _setPermissions: function(user) {
-      var myPermisions = {'loggedInDefault':true};
+      var myPermisions = {};
+      var allp  = this.allPermissions;
       // add all default permissions (while testing these are set to all permissions)
-      var defaultPermissions = this.appData.permissions.defaultPermissions;
-      for (var dperm in defaultPermissions) {
-        myPermisions[defaultPermissions[dperm]] = true;
-      }
-      if (!user.is_staff) {
-        var partnerOnlyPermissions = this.appData.permissions.partnerOnlyPermissions;
-        for (var perm in partnerOnlyPermissions) {
-          myPermisions[partnerOnlyPermissions[perm]] = true;
-        }
+      var defaultPermissions = allp.defaultPermissions;
+
+      defaultPermissions.forEach(function(perm){
+        myPermisions[perm] = true;
+      })
+      console.log(user)
+      // if partner: (!staff)
+      if (!user.is_staff){
+        allp.partnerOnlyPermissions.forEach(function(perm){
+          myPermisions[perm] = true;
+        })
       } else {
-        this.appData.permissions.managementPermissions.forEach(function(perm){
+        // user is not partner but staff:
+        allp.managementPermissions.forEach(function(perm){
           myPermisions[perm] = true;
         });
+        if (user.profile.partner_staff_member){
+        // staff that has faked partnership by setting partner_staff_member on their profile
+          allp.partnerPermissions.forEach(function(perm){
+            myPermisions[perm] = true;
+          });
+        }
       }
-      if (user.profile.partner_staff_member){
-        this.appData.permissions.partnerPermissions.forEach(function(perm){
-          myPermisions[perm] = true;
-        });
-      }
+      
       this.set('permissions', myPermisions);
     }
     

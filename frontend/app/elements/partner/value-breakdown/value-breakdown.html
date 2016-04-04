@@ -86,7 +86,8 @@
     properties: {
       mainTotal: Number,
       disaggregation: {
-        type: Object
+        type: Object,
+        observer: '_disaggregationChanged'
       },
       breakdowns: {
         type: Object
@@ -95,16 +96,27 @@
         type: Number,
         value: 0
       }
-           
-      
     },
-    ready: function() {
+    attached: function() {
+      // console.log('el attached')
+      //this.recursiveMap(this.disaggregation);
+    },
+    attributeChanged: function(name, type) {
+      // console.log(this.localName + '#' + this.id + ' attribute ' + name +
+      // ' was changed to ' + this.getAttribute(name));
+    },
+    _disaggregationChanged: function(obj) {
       this.recursiveMap(this.disaggregation);
     },
-    
     recursiveMap: function(d){
       if (!d) { return; }
       var order = d.order;
+      if (!order) {
+        //depracated disaggregation;
+        console.error('this type of disaggregation was deprecated');
+        this.disaggregation = null;
+        return;
+      };
       var tempLol = [];
       order.forEach(function (e){
         tempLol.push(d[e]);
