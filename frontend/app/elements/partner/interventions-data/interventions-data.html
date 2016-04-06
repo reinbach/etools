@@ -28,51 +28,16 @@
         notify: true,
         value: []
       },
-      interventionId: {
-        type: Number,
-        observer: '_getIntervention'
-      },
       url: {
         type: String,
         value: null
-      },
-      intervention: {
-        type: Object,
-        value: null,
-        notify: true
-      },
-      details: {
-        type: Boolean,
-        value: false
-      }
-    },
+      }    },
     ready: function(){
-        if (this.details){
-            //wait for the interventionId change to trigger the load
-            return;
-        }
-        console.log('calling interventions ajax with no details:', this.details);
         this.$.ajax.endpoint = {ep: 'interventions'};
     },
-    _getIntervention: function() {
-        if ((!this.details) || (!this.interventionId)) {
-          return;
-        }
-        if (!this.interventions.length) {
-            this.$.ajax.endpoint = {ep: 'interventions'};
-            return;
-        } else {
-            this._mapIntervention(this.interventionId);
-        }
-    },
-    _mapIntervention: function(id) {
-      this.intervention = _.find(this.interventions, function(item) { return item.id === Number(id); });
-    },
+   
     handleResponse: function(rsp) {
       this.interventions = rsp.detail;
-      if (this.interventionId) {
-        this._mapIntervention(this.interventionId);
-      }
     }
   });
 })();

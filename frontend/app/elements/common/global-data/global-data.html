@@ -116,13 +116,12 @@ Example:
 
       defaultPermissions.forEach(function(perm){
         myPermisions[perm] = true;
-      })
-      console.log(user)
+      });
       // if partner: (!staff)
       if (!user.is_staff){
         allp.partnerOnlyPermissions.forEach(function(perm){
           myPermisions[perm] = true;
-        })
+        });
       } else {
         // user is not partner but staff:
         allp.managementPermissions.forEach(function(perm){

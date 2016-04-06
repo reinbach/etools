@@ -83,18 +83,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             
           <template is="dom-if" if='{{permissions.loggedInDefault}}'>
             <a data-route="myInfo" href="{{baseUrl}}myInfo">
-              <iron-icon icon="info"></iron-icon>
+              <iron-icon icon="account-circle"></iron-icon>
               <span>My Information</span>
             </a>
           </template>   
 
           <template is="dom-if" if='{{permissions.interventionsMenu}}'>
             <a data-route="myInterventions" href="{{baseUrl}}myInterventions">
-              <iron-icon icon="info"></iron-icon>
+              <iron-icon icon="group-work"></iron-icon>
               <span>Interventions</span>
             </a>
             <a data-route="reportingDash" href="{{baseUrl}}reportingDash">
-              <iron-icon icon="info"></iron-icon>
+              <iron-icon icon="dashboard"></iron-icon>
               <span>Reporting Dashbord</span>
             </a>
           </template> 
@@ -174,33 +174,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       app-data="[[appData]]" interventions={{interventions}}>
                   </interventions-page>
               </section>
-            </template>
+            
+              <section data-route="intervention">
+                  <intervention-details app-data="{{appData}}" interventions={{interventions}} intervention-id="[[params.intv]]"></intervention-details> 
+              </section>
 
-            <section data-route="intervention">
-                <intervention-details app-data="{{appData}}" intervention-id="[[params.intv]]"></intervention-details> 
-            </section>
-            <section data-route="reportingDash">
-                <reporting-dash></reporting-dash>
-            </section>
+              <section data-route="reportingDash">
+                  <reporting-dash interventions={{interventions}}></reporting-dash>
+              </section>
 
-            <section data-route="rcReport">
-                <rc-report app-data="[[appData]]" 
-                  interventions="{{interventions}}" 
-                  intervention-id="[[params.intvId]]"
-                  rc-id="[[params.rcId]]"></rc-report> 
-            </section>
+              <section data-route="rcReport">
+                  <rc-report app-data="[[appData]]" 
+                    interventions="{{interventions}}" 
+                    intervention-id="[[params.intvId]]"
+                    rc-id="[[params.rcId]]"></rc-report> 
+              </section>
+            </template> 
 
           </iron-pages>
         </div>
       </paper-scroll-header-panel>
     </paper-drawer-panel>
       
-      
+
+
+
       <paper-toast id="toast" duration="0">
       <span class="toast-hide-button" role="button" tabindex="0" onclick="app.$.toast.hide()">Ok</span>
     </paper-toast>
     
-
+    <template is="dom-if" if='{{permissions.interventionsMenu}}'>
+      <interventions-data id="interventionData" interventions={{interventions}}></interventions-data>
+    </template>
   </template>
 
   <!-- build:js /static/frontend/partner/scripts/app.js -->

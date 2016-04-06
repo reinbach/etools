@@ -12,6 +12,15 @@ commonBv.utils = {
   },
   underscoreless: function(s) {
     return s.replace('_',' ');
+  },
+  _toArray: function(obj) {
+    // transform object to array
+    return Object.keys(obj).map(function(key) {
+        return {
+            name: key,
+            value: obj[key]
+        };
+    });
   }
 };
 var config = {

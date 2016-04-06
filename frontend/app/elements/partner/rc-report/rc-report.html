@@ -176,7 +176,7 @@
         <br>
         <p>Location: 
           <locations-autocomplete id="locationSelected"
-              autocomplete-url="{{appData.locationsAutocompleteEp}}">
+              autocomplete-url="{{_autocompleteUrl()}}">
           </locations-autocomplete>
         </p>
         <br>
@@ -206,7 +206,7 @@
   'use strict';
   Polymer({
     is: 'rc-report',
-    behaviors: [commonBv.utils],
+    behaviors: [commonBv.utils, commonBv.globals],
     properties: {
       appData: {
         type: Object,
@@ -318,6 +318,9 @@
     _sortDate: function(a, b) {
       return a.modified < b.modified ? 1 : -1;
       //return a.total < b.total ? 1 : -1;
+    },
+    _autocompleteUrl: function() {
+      return this.getEp('locationsAutocomplete').url;
     }
   });
 })();

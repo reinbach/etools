@@ -19,6 +19,7 @@
 
 
 <link rel="import" href="../../behaviors/common/utils.html">
+<link rel="import" href="../../behaviors/partner/partner.html">
 <link rel="import" href="../interventions-data/interventions-data.html">
 
 <dom-module id="intervention-details">
@@ -155,7 +156,7 @@
     color: white;
   }
   </style>
-  <interventions-data id="interventionData" details="true" intervention={{intervention}}></interventions-data>
+  <!-- <interventions-data id="interventionData" details="true" intervention={{intervention}}></interventions-data> -->
     
 
   <h1 hidden$="[[!pageLoading]]">
@@ -207,7 +208,7 @@
                 <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
                 <div hidden$="[[reportingActive]]" class$="{{_getClass(rc.disaggregation)}}">
                   <locations-autocomplete class="reportInput" id="locationSelected" label="Location"
-                      autocomplete-url="{{appData.locationsAutocompleteEp}}">
+                      autocomplete-url="{{_autocompleteUrl()}}">
                   </locations-autocomplete><span>&nbsp;</span>
                   <value-breakdown class="reportInput" id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
                   
@@ -239,7 +240,7 @@
   'use strict';
   Polymer({
     is: 'intervention-details',
-    behaviors: [commonBv.utils],
+    behaviors: [commonBv.utils, commonBv.interventions, commonBv.globals],
     properties: {
       selectedTab: {
         type: Number,
@@ -253,6 +254,10 @@
       pageLoading: {
         type: Boolean,
         value: false
+      },
+      interventions: {
+        type: Object,
+        observer: 'changeUrl'
       },
       interventionId: {
         type: Number,
@@ -281,48 +286,12 @@
         value: true
       }
     },
-    changeUrl: function(id){
-      if (id){
+    changeUrl: function(){
+      if (this.interventionId && this.interventions){
         this.reportingActive = true;
-        this.$.interventionData.interventionId = this.interventionId;
+        this.intervention = this._getIntervention(this.interventionId);
+        //this.$.interventionData.interventionId = this.interventionId;
       }
-    },
-    _processIntervention: function(intervention) {
-        if (!intervention){
-          return;
-        }
-        // need to get a dict of indicators filtered by output;
-        var inds = [];
-        var tempOutputs = {};
-
-        intervention.results.forEach(function(el) {
-          // el is the result_chain object
-          // Make sure it's an indicator result
-          if (!el.indicator){
-            return;
-          }
-          inds.push(el);
-          if (tempOutputs[el.result.id]){
-            tempOutputs[el.result.id].indicators.push(el);
-          } else {
-            tempOutputs[el.result.id] = {};
-            tempOutputs[el.result.id].output = el.result;
-            tempOutputs[el.result.id].indicators = [el];
-          }
-
-        });
-        var outputs = [];
-        _.each(tempOutputs, function(value) {
-            outputs.push(value);
-        });
-        this.indicators = inds;
-        this.outputs = outputs;
-
-        // var elements = Array.from(this.querySelectorAll('.reportInput'));
-        // elements.forEach(function(el) {
-        //   el.render();
-        // });
-        ///
     },
     _goToReport: function(ev){
       // go to the reporting page
@@ -337,15 +306,6 @@
       // for validation return false if object has no keys
       return (typeof(obj) === 'object') ? Object.keys(obj).length : false;
     },
-    _toArray: function(obj) {
-      // transform object to array
-      return Object.keys(obj).map(function(key) {
-          return {
-              name: key,
-              value: obj[key]
-          };
-      });
-    },
     _toggleReport: function() {
       this.reportingActive = !this.reportingActive;
     },
@@ -357,6 +317,9 @@
     },
     _reportIcon: function(v) {
       return v ? 'check' : 'clear';
+    },
+    _autocompleteUrl: function() {
+      return this.getEp('locationsAutocomplete').url;
     }
   });
 })();

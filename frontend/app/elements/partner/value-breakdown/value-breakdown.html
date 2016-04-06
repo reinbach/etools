@@ -2,7 +2,7 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 
 
-<link rel="import" href="../../../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../../../bower_components/iron-icons/hardware-icons.html">
 <link rel="import" href="../../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
@@ -50,7 +50,7 @@
             hidden$="[[!disaggregation]]"
             class="blue" 
             mini 
-            icon="communication:call-split"
+            icon="hardware:device-hub"
             on-tap="_toggleDisaggregation"
             ></paper-fab>
     </div>
@@ -101,11 +101,11 @@
       // console.log('el attached')
       //this.recursiveMap(this.disaggregation);
     },
-    attributeChanged: function(name, type) {
+    attributeChanged: function() {
       // console.log(this.localName + '#' + this.id + ' attribute ' + name +
       // ' was changed to ' + this.getAttribute(name));
     },
-    _disaggregationChanged: function(obj) {
+    _disaggregationChanged: function() {
       this.recursiveMap(this.disaggregation);
     },
     recursiveMap: function(d){
@@ -116,7 +116,7 @@
         console.error('this type of disaggregation was deprecated');
         this.disaggregation = null;
         return;
-      };
+      }
       var tempLol = [];
       order.forEach(function (e){
         tempLol.push(d[e]);

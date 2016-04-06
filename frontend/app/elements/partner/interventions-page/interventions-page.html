@@ -78,7 +78,7 @@ Example:
         background-color: var(--primary-background-color);
       }
     </style>
-    <interventions-data interventions={{interventions}}></interventions-data>
+    <!-- <interventions-data interventions={{interventions}}></interventions-data> -->
     
 
     <h2>Current interventions: </h2>
@@ -121,6 +121,9 @@ Example:
         type: Object,
         // appData is received from the parent
         value: {}
+      },
+      interventions: {
+        type: Object
       }
       
     },
