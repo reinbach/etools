@@ -46,6 +46,7 @@ class Command(BaseCommand):
 
         connection = self.initiate_mongo_connection()
         lebanon = connection.data
+        pcodes = connection.pcodes
         i=0
         for row in rows:
              doc = row['doc']
@@ -55,6 +56,19 @@ class Command(BaseCommand):
                      doc['partner_name'] = 'sawa'
                  if doc['partner_name'] == 'unicef-leb':
                      doc['partner_name'] = 'lost'
+
+            ## ADD ADMIN LEVEL DATA
+
+
+             if 'location' in doc:
+                 print doc['location']['p_code']
+                 pcode = json.loads(dumps(pcodes.find_one({'_id': doc['location']['p_code']})))
+                 if pcode != None:
+                     print pcode["_id"]
+                     doc["governorate"] = pcode["governorate"]
+                     doc["district"] = pcode["district"]
+                     doc["cadastral"] = pcode["cadastral"]
+                     print doc["governorate"] +" "+doc["district"]+" "+doc["cadastral"]
 
 
             ## REMOVE ARRAYS
@@ -87,13 +101,14 @@ class Command(BaseCommand):
 
                 #if (old['gender'] == '' or old['gender'] == "N/A") and (old['first_name'] == '' or old['first_name'] == 'N/A') and  old['last_name'] == '' and old['middle_name'] == '':
 
+                print doc['_id']
 
-                if 'rais_doc' not in old.keys() or old['_rev'] != doc['_rev']:
+                if  old == None or 'rais_doc' not in old.keys() or old['_rev'] != doc['_rev']:
                 #if i>=25608:
                     pa = raisScript.getpabycase(doc['official_id'])
-                    print(old)
-                    print old['_rev']
-                    print doc['_rev']
+                    #print(old)
+                    #print old['_rev']
+                    #print doc['_rev']
                     if pa != None and len(pa)>0:
 
                         pa = pa[0]
