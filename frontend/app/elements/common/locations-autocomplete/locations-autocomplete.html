@@ -99,6 +99,10 @@
         type: Object,
         notify: true
       },
+      selectedLocationReport: {
+        type: Object,
+        notify: true
+      },
       selectionChange: {
         type: Boolean,
         value: false
@@ -126,11 +130,13 @@
       this.value = null;
       this.searchValue = null;
       this.selectedLocation = null;
+      this.selectedLocationReport = null;
     },
     attached: function() {
         //
         if (this.selectedLocation){
           this.preselected = true;
+          this.selectedLocationReport = this.selectedLocation;
           this.searchValue = this.selectedLocation.name;
           this.value = this.selectedLocation.id;
           // console.log('preselectedlocation, ', this.selectedLocation)
@@ -144,6 +150,8 @@
           return;
         }
         this.value = null;
+        this.selectedLocation = null;
+        this.selectedLocationReport = null;
         var collapse = this.$.collapse;
         if (e !== undefined && e !== '') {
           // trigger request
@@ -172,7 +180,11 @@
         this.set('selectedLocation', {
           id: event.model.item.id,
           name: event.model.item.name
-        })
+        });
+        this.set('selectedLocationReport', {
+          id: event.model.item.id,
+          name: event.model.item.name
+        });
         this.$.collapse.toggle();
     },
     changeUrl: function(){

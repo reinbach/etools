@@ -16,6 +16,7 @@
 <link rel="import" href="../../common/timeframe-picker/timeframe-picker.html">
 
 <link rel="import" href="../value-breakdown/value-breakdown.html">
+<link rel="import" href="../etools-indicator/etools-indicator.html">
 
 
 <link rel="import" href="../../behaviors/common/utils.html">
@@ -198,24 +199,7 @@
       <div class="indicatorsBlock">
 
         <template is="dom-repeat" items="[[out.indicators]]" as="rc">
-          <div class="indicator">
-              <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report</span></p>
-              <div class="indicatorReportBlock">
-                <div class="progressBlock">
-                  <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
-                  <p> {{rc.current_progress}}/{{rc.target}}</p>
-                </div>
-                <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
-                <div hidden$="[[reportingActive]]" class$="{{_getClass(rc.disaggregation)}}">
-                  <locations-autocomplete class="reportInput" id="locationSelected" label="Location"
-                      autocomplete-url="{{_autocompleteUrl()}}">
-                  </locations-autocomplete><span>&nbsp;</span>
-                  <value-breakdown class="reportInput" id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
-                  
-                </div>
-              </div>
-          </div>
-          <hr hidden$="[[reportingActive]]">
+          <etools-indicator rc={{rc}} reporting-active={{reportingActive}}></etools-indicator>
         </template>
 
       </div>
@@ -245,11 +229,6 @@
       selectedTab: {
         type: Number,
         value: 0
-      },
-      appData: {
-        type: Object,
-        // appData is received from the parent
-        value: {}
       },
       pageLoading: {
         type: Boolean,
@@ -293,19 +272,6 @@
         //this.$.interventionData.interventionId = this.interventionId;
       }
     },
-    _goToReport: function(ev){
-      // go to the reporting page
-      page(this.appData.baseUrl+'rcReport/'+this.interventionId+'/'+ ev.currentTarget.rcId + '/');
-
-    },
-    handleResponse: function(rsp) {
-      // handle the response from the server
-      this.intervention = rsp.detail;
-    },
-    _emptyObject: function(obj) {
-      // for validation return false if object has no keys
-      return (typeof(obj) === 'object') ? Object.keys(obj).length : false;
-    },
     _toggleReport: function() {
       this.reportingActive = !this.reportingActive;
     },
@@ -317,9 +283,6 @@
     },
     _reportIcon: function(v) {
       return v ? 'check' : 'clear';
-    },
-    _autocompleteUrl: function() {
-      return this.getEp('locationsAutocomplete').url;
     }
   });
 })();

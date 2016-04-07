@@ -68,7 +68,7 @@
     </iron-collapse>
 
     <p hidden$="{{!disLevel}}"><span class="intLabel">Disaggregate by: </span><span class="disTitle">{{_computeItem(disLevel, 1)}}</span> </p>
-    <input-recursive total="{{mainTotal}}" hidden$="{{!disLevel}}" level="{{disLevel}}" breakdown="{{breakdowns.breakdown}}"></input-recursive>
+    <input-recursive total="{{total}}" hidden$="{{!disLevel}}" level="{{disLevel}}" breakdown="{{breakdowns.breakdown}}"></input-recursive>
       
 
   
@@ -85,6 +85,10 @@
     behaviors: [],
     properties: {
       mainTotal: Number,
+      total: {
+        type: Number,
+        observer: '_totalChanged'
+      },
       disaggregation: {
         type: Object,
         observer: '_disaggregationChanged'
@@ -104,6 +108,19 @@
     attributeChanged: function() {
       // console.log(this.localName + '#' + this.id + ' attribute ' + name +
       // ' was changed to ' + this.getAttribute(name));
+    },
+    _totalChanged: function(totValue) {
+
+      console.log('total changed', (typeof totValue));
+      if ((totValue !== 0) && (totValue)){
+        this.mainTotal = this.total;
+        this.breakdowns.total = this.disLevel ? this.total : null;
+        this.reportResult = {
+          total: this.total,
+          breakdown: this.breakdowns
+        }
+      }
+
     },
     _disaggregationChanged: function() {
       this.recursiveMap(this.disaggregation);

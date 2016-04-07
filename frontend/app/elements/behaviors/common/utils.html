@@ -51,6 +51,9 @@ var config = {
       template: '/api/interventions/<%=interventionId%>/results/<%=rcId%>/reports'
     }
   },
+  paths: {
+    indicatorDetails: 'rcReport/<%=interventionId%>/<%=rcId%>/'
+  },
   permissions: {
     partnerOnlyPermissions: ['interventionsMenu'],
     defaultPermissions: ['loggedInDefault','userInfoMenu'],
@@ -61,6 +64,10 @@ var config = {
 
 commonBv.globals = {
     baseSite: window.location.origin,
+    basePath: (window.location.port === '5000') ? '/' : '/partners/',
+    getPath: function(p, data) {
+      return this.basePath + _.template(config.paths[p])(data);
+    },
     getEp: function(ep, data) {
       return {
         url: this.baseSite + _.template(config.endpoints[ep].template)(data),

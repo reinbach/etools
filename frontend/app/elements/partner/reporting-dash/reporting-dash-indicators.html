@@ -1,36 +1,17 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../styles/partner/partner-styles.html">
+
+<link rel="import" href="../etools-indicator/etools-indicator.html">
+
+
 
 <dom-module id="reportingdash-indicators">
   <template>
-  <style include="partner-styles">
-  </style>
+    <template is="dom-repeat" items="[[indicators]]" as="rc">
+      <etools-indicator rc={{rc}} removable-indicators={{removableIndicators}}></etools-indicator>
+    </template>
+  </template>
 
-        <template is="dom-repeat" items="[[indicators]]" as="rc">
-
-          <div class="indicator">
-              <p class="indicatorName">{{rc.indicator.name}} - <span on-tap="_goToReport" rc-id="{{rc.id}}">individual report </span><span hidden$="[[!removableIndicators]]" rc-id="{{rc.id}}" intervention-id="{{rc.partnership}}" on-tap="_removeFromView">Remove indicator</span></p>
-              <div class="indicatorReportBlock">
-                <div class="progressBlock">
-                  <paper-progress value="{{rc.current_progress}}" max="{{rc.target}}" class="blue"></paper-progress>
-                  <p> {{rc.current_progress}}/{{rc.target}}</p>
-                </div>
-                <progress-bar current="{{rc.current_progress}}" against="{{rc.target}}"></progress-bar>
-                <div hidden$="[[reportingActive]]" class$="{{_getClass(rc.disaggregation)}}">
-                  <locations-autocomplete selected-location="[[rc.preselectedLocation]]" class="reportInput" id="locationSelected" label="Location"
-                      autocomplete-url="{{_autocompleteUrl()}}">
-                  </locations-autocomplete><span>&nbsp;</span>
-                  <value-breakdown class="reportInput" id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
-                </div>
-              </div>
-          </div>
-          <hr hidden$="[[reportingActive]]">
-
-        </template>
-      </template>
-
-  <script>
+<script>
 (function() {
     // jscs:disable
   'use strict';
@@ -38,44 +19,15 @@
     is: 'reportingdash-indicators',
     behaviors: [commonBv.utils, commonBv.interventions, commonBv.globals],
     properties: {
-      appData: {
-        type: Object,
-        // appData is received from the parent
-        value: {}
-      },
       indicators: {
         type: Array
-      },
-      url: {
-        type: String,
-        value: null
-      },
-      reportingActive: {
-        type: Boolean,
-        value: false
       },
       removableIndicators: {
         type: Boolean,
         value: false
       }
-    },
-    _removeFromView: function(ev){
-      this.fire('remove-indicator',
-                {rcId: ev.currentTarget.rcId, interventionId: ev.currentTarget.interventionId});
-    },
-    _goToReport: function(ev){
-      // go to the reporting page
-      console.error('add appdata here')
-      page(this.appData.baseUrl+'rcReport/'+this.interventionId+'/'+ ev.currentTarget.rcId + '/');
-
-    },
-    _getClass: function(disaggregation){
-      return disaggregation ? 'bulkReportIndicator-d' : 'bulkReportIndicator';
-    },
-    _autocompleteUrl: function() {
-      return this.getEp('locationsAutocomplete').url;
     }
   });
 })();
-
 </script>
+</dom-module>

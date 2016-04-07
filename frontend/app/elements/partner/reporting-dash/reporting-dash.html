@@ -165,10 +165,6 @@
             
   </template>
 
-    
-  <!-- <reportingdash-indicators id="allIndicators"></reportingdash-indicators> -->
-
-
   </template>
 
 </dom-module>
@@ -213,7 +209,8 @@
         var tempArray = [];
         var location = obj.name;
         obj.value.forEach(function (ind){
-          var indicator = this._getIndicator(ind.interventionId, ind.rcId);
+          // deep copy the indicator
+          var indicator = JSON.parse(JSON.stringify(this._getIndicator(ind.interventionId, ind.rcId)));
           indicator.preselectedLocation = dashData.locations[location];
           tempArray.push(indicator);
         }, this);
@@ -374,3 +371,4 @@
 })();
 
 </script>
+</dom-module>

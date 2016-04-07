@@ -114,6 +114,7 @@
         //this.disabledInput = true;
       }
       this.total = total;
+      
     },
     _totalChanged: function(cval) {
       // here the cva.path should be only one level deep
@@ -140,7 +141,7 @@
       return ((level-1)<1) ? true : false;
     },
     _levelChanged: function(level){
-      if (level===1) {
+      if (true) {
         // set all values to null
         var elements = Array.from(this.querySelectorAll('.motherInput'));
         elements.forEach(function(el) {
