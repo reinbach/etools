@@ -99,6 +99,10 @@
       disLevel: {
         type: Number,
         value: 0
+      },
+      repres: {
+        type: Object,
+        notify: true
       }
     },
     attached: function() {
@@ -115,10 +119,11 @@
       if ((totValue !== 0) && (totValue)){
         this.mainTotal = this.total;
         this.breakdowns.total = this.disLevel ? this.total : null;
-        this.reportResult = {
+        var res = {
           total: this.total,
           breakdown: this.breakdowns
-        }
+        };
+        this.set('repres', res);
       }
 
     },

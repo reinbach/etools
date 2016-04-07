@@ -45,9 +45,9 @@
               </paper-radio-group>
             </div>
             
-            <value-breakdown class="reportInput" id="valBreakdown" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
+            <value-breakdown class="reportInput" id="valBreakdown" repres="{{selectedNumberResult}}" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
             <div class="narativeReport">
-              <paper-textarea label="Optional Narative (this text area grows as you type)"></paper-textarea>
+              <paper-textarea value="{{selectedNarative}}" label="Optional Narative (this text area grows as you type)"></paper-textarea>
             </div>
           </div>
         </div>
@@ -85,7 +85,11 @@
       selectedStatus: {
         type: String,
         value: 'ontrack'
-      }
+      },
+      selectedNumberResult: {
+        type: Object
+      },
+      selectedNarative: Object
 
     },
     _removeFromView: function(ev){
@@ -98,7 +102,6 @@
         interventionId: ev.currentTarget.interventionId,
         rcId: ev.currentTarget.rcId
       }));
-
     },
     _getClass: function(disaggregation){
       return disaggregation ? 'bulkReportIndicator-d' : 'bulkReportIndicator';
