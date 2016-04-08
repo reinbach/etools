@@ -200,7 +200,7 @@
       }
     },
     _getMyIndicators: function (dashData){
-      console.log('getting my indicators ', dashData);
+      // console.log('getting my indicators ', dashData);
       var myIndicators = [];
       var tempData = this._toArray(dashData.indicators);
       
@@ -227,13 +227,13 @@
       this.removableIndicators = !this.removableIndicators;
     },
     _removeIndicator: function(ev){
-      console.log('removing indicator');
+      // console.log('removing indicator');
       var rcId = ev.detail.rcId;
       var interventionId = ev.detail.interventionId;
       var location = ev.currentTarget.dataLocation;
       var dashData = this.dashData;
       // remove indicator from indicator list
-      console.log(dashData.indicators[location.id]);
+      // console.log(dashData.indicators[location.id]);
       dashData.indicators[location.id] =  _.reject(
         dashData.indicators[location.id], 
         function(ind){ 

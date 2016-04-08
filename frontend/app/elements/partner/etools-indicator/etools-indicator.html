@@ -21,7 +21,7 @@
       <div class="indicator">
         <div class="indicatorHeader">
           <p class="indicatorName">{{rc.indicator.name}}</p>
-          <paper-fab class="grey" mini icon="launch" on-tap="_goToReport" rc-id="{{rc.id}}" intervention-id="{{rc.partnership}}"></paper-fab>
+          <paper-fab class="grey" mini icon="launch" on-tap="_goToReport" rc-id="{{rc.id}}" hidden$="[[noLink]]" intervention-id="{{rc.partnership}}"></paper-fab>
           <!-- <div on-tap="_goToReport" rc-id="{{rc.id}}">individual report </div> -->
           <paper-fab class="red" mini icon="remove" hidden$="[[!removableIndicators]]" rc-id="{{rc.id}}" 
               intervention-id="{{rc.partnership}}" on-tap="_removeFromView">Remove indicator</paper-fab>
@@ -75,6 +75,10 @@
         type: Boolean,
         value: false
       },
+      noLink: {
+        type: Boolean,
+        value: false
+      },
       report: {
         type: Object,
         notify: true
@@ -108,6 +112,14 @@
     },
     _autocompleteUrl: function() {
       return this.getEp('locationsAutocomplete').url;
+    },
+    getReport: function() {
+      return {
+        location: this.selectedLocationReport,
+        number: this.selectedNumberResult,
+        status: this.selectedStatus,
+        narative: this.selectedNarative
+      }
     }
   });
 })();

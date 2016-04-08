@@ -84,7 +84,10 @@
     is: 'value-breakdown',
     behaviors: [],
     properties: {
-      mainTotal: Number,
+      mainTotal: {
+        type: Number,
+        observer: '_mainTotalChanged'
+      },
       total: {
         type: Number,
         observer: '_totalChanged'
@@ -113,18 +116,22 @@
       // console.log(this.localName + '#' + this.id + ' attribute ' + name +
       // ' was changed to ' + this.getAttribute(name));
     },
-    _totalChanged: function(totValue) {
+    _totalChanged: function(totDisValue){
+      this.mainTotal = totDisValue;
+    },
+    _mainTotalChanged: function(totValue) {
 
-      console.log('total changed', (typeof totValue));
+      // console.log('total changed', (typeof totValue));
+      var res = {
+        total: this.mainTotal,
+        breakdown: this.breakdowns
+      };
       if ((totValue !== 0) && (totValue)){
-        this.mainTotal = this.total;
         this.breakdowns.total = this.disLevel ? this.total : null;
-        var res = {
-          total: this.total,
-          breakdown: this.breakdowns
-        };
-        this.set('repres', res);
+        res.breakdown = this.breakdowns;
       }
+
+      this.set('repres', res);
 
     },
     _disaggregationChanged: function() {
