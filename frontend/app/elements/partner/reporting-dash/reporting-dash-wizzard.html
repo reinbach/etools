@@ -190,7 +190,7 @@
       wizzardStep: {
         type: Number,
         value: 0,
-        observer: "_wizzardReset"
+        observer: '_wizzardReset'
       },
       addReady: {
         type: Boolean,
@@ -249,7 +249,6 @@
     },
     _interventionSelected: function(e) {
       var interventionId = e.model.item.id;
-      var intervention = this._getIntervention(interventionId);
       this.interventionIndicators = this._getIndicators(interventionId);
       this._goToNextStep();
 
