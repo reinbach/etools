@@ -177,10 +177,11 @@
   Polymer({
     is: 'reporting-dash',
     behaviors: [commonBv.utils, commonBv.globals, commonBv.interventions],
+    observers: ['updateView(interventions.*)'],
     properties: {
       interventions: {
-        type: Array,
-        observer: 'updateView'
+        type: Array
+        // observer: 'updateView'
       },
       wizzardStep: {
         type: Number,
@@ -201,6 +202,10 @@
     },
     _getMyIndicators: function (dashData){
       // console.log('getting my indicators ', dashData);
+      if (!dashData) {
+        console.info('no dasboard data set');
+        return;
+      }
       var myIndicators = [];
       var tempData = this._toArray(dashData.indicators);
       
@@ -269,8 +274,8 @@
       this._getMyIndicators(dashData);
       this.emptyTemplate = false;
     },
-    updateView: function() {
-      
+    _updateViewDebounced: function() {
+      console.log('updating reporting Dash View');
       if (!this.interventions.length) {
         return;
       }
@@ -283,6 +288,9 @@
       this.emptyTemplate = ((!dashData) || (_.isEmpty(dashData.locations))) ? true : false;
       this._getMyIndicators(dashData);
       
+    },
+    updateView: function() {
+      this.debounce('updateReportingDashDebounce', this._updateViewDebounced, 2000);
     },
     _recenterDialog: function(event) {
       this.$.newIndicatorDialog.center();

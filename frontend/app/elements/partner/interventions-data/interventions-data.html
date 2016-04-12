@@ -22,6 +22,7 @@
   'use strict';
   Polymer({
     is: 'interventions-data',
+    observers: ['_updateInterventions(interventions.*)'],
     properties: {
       interventions: {
         type: Array,
@@ -31,13 +32,17 @@
       url: {
         type: String,
         value: null
-      }    },
+      }    
+    },
     ready: function(){
         this.$.ajax.endpoint = {ep: 'interventions'};
     },
    
     handleResponse: function(rsp) {
       this.interventions = rsp.detail;
+    },
+    _updateInterventions: function() {
+      console.log('Interventions updated woo');
     }
   });
 })();

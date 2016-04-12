@@ -115,6 +115,7 @@
 
 
         <div id="interventionChoices">
+          <h4>Selected location: {{selectedLocation.name}}</h4>
           <iron-list id="list" items="[[interventions]]" as="item">
             <template>
               <div class="item"  on-tap="_interventionSelected" tabindex="0">
@@ -139,6 +140,7 @@
         </div>
 
         <div id="indicatorChoices">
+          <h4>Selected location: {{selectedLocation.name}}</h4>
           <iron-list id="indicatorChoicesList" 
                     items="[[interventionIndicators]]" 
                     as="rc" 

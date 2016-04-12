@@ -201,12 +201,17 @@
   'use strict';
   Polymer({
     is: 'rc-report',
-    behaviors: [commonBv.utils, commonBv.globals],
+    behaviors: [commonBv.utils, commonBv.interventions, commonBv.globals],
+    observers: ['_interventionsChanged(interventions.*)'],
     properties: {
       appData: {
         type: Object,
         // appData is received from the parent
         value: {}
+      },
+      interventions: {
+        type: Array,
+        notify: true
       },
       interventionId: {
         type: Number,
@@ -221,7 +226,7 @@
       rc: {
         type: Object,
         value: null,
-        observer: 'update_view'
+        observer: 'update_view',
       },
       indicatorReports: {
         type: Array,
@@ -255,6 +260,10 @@
       this.set('indicatorReports', this.rc.indicator_reports.concat([rsp.detail]));
       this.rc.indicator_reports.push(rsp.detail);
       this.set('rc.current_progress', (this.rc.current_progress + rsp.detail.total));
+
+      // update indicator in localstorage
+      this._updateIndicator(this.rc);
+      
     },
     handleSubmitError: function(rsp) {
       console.log(rsp.detail.error);
@@ -326,6 +335,9 @@
     },
     _autocompleteUrl: function() {
       return this.getEp('locationsAutocomplete').url;
+    },
+    _interventionsChanged: function() {
+      console.log('interventions changed inside rc-report');
     }
   });
 })();
