@@ -77,13 +77,18 @@ Example:
       }
     },
 
-    handleError: function(request, error){
+    handleError: function(event, error){
       console.log('handling the error from etools-ajax');
       console.log('add error checking and validation here');
       // TODO: alert with needed errors.
-      console.error([error.error, 'while loading', request.srcElement.url].join(': '));
+      console.error([error.error, 'while loading', event.srcElement.url].join(': '));
+      // in case the user is logged out...
+      if ([401, 403].indexOf(error.request.status) !== -1 ){
+        window.location = this.getEp('login');
+        return;
+      }
       this.fire('error', {
-        request: request,
+        request: event,
         error: error.error
       }, {bubbles: false});
     },
@@ -93,14 +98,22 @@ Example:
       //console.log(rsp.detail.xhr.response, rsp.detail.xhr)
       //console.log(rsp.detail.xhr.responseURL);
       //console.log(rsp.srcElement.url);
-      // TODO: move this logic into default behaviours
-      if (rsp.detail.xhr.responseURL !== rsp.srcElement.url){
-        console.error('expected link did not work, got redirected',rsp.detail.xhr.responseURL, rsp.srcElement.url);
-        // TODO: if we get redirected to login.. trigger a global redirect mechanism
-        // this._handleUnexpectedResponse();
-        return;
-      }
+
+      // TODO: responseURL does not exist in IE11 and Safari
+      // if (rsp.detail.xhr.responseURL !== rsp.srcElement.url){
+      //   console.error('expected link did not work, got redirected', rsp.detail.xhr.responseURL, rsp.srcElement.url);
+      //   // TODO: if we get redirected to login.. trigger a global redirect mechanism
+      //   // this._handleUnexpectedResponse();
+      //   return;
+      // }
       // console.log('detail here', rsp.detail.xhr.response)
+      console.log(
+        rsp.srcElement.url,
+        'xhr response ',
+        rsp.detail.xhr,
+        rsp.detail.xhr.responseURL,
+        rsp.detail.xhr.location  
+      );
       if (this.ep && this.ep.exp){
         var localVal = {
           detail: rsp.detail.xhr.response,
@@ -161,11 +174,11 @@ Example:
       if (!Object.keys(newEndpoint)) {
         return;
       }
-      var now = Date.now();
-
+      
       this.ep = this.getEp(newEndpoint.ep, newEndpoint.data);
       // Check if endpoint should be in localstorage,
       if (this.ep.exp){
+        var now = Date.now();
         //  Try to get info from localstorage
         var rsp = JSON.parse(window.localStorage.getItem(this.ep.url) || null);
         if ((rsp) && ((rsp.exp-now) > 0)) {
