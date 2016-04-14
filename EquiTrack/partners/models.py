@@ -10,6 +10,7 @@ from django.db import models, connection
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext as _
 
 from jsonfield import JSONField
 from filer.fields.file import FilerFileField
@@ -49,12 +50,12 @@ from . import emails
 
 HIGH = u'high'
 SIGNIFICANT = u'significant'
-MODERATE = u'moderate'
+MEDIUM = u'medium'
 LOW = u'low'
 RISK_RATINGS = (
     (HIGH, u'High'),
     (SIGNIFICANT, u'Significant'),
-    (MODERATE, u'Moderate'),
+    (MEDIUM, u'Medium'),
     (LOW, u'Low'),
 )
 
@@ -83,7 +84,6 @@ class PartnerOrganization(models.Model):
     )
     name = models.CharField(
         max_length=255,
-        unique=True,
         verbose_name='Full Name',
         help_text=u'Please make sure this matches the name you enter in VISION'
     )
@@ -109,7 +109,8 @@ class PartnerOrganization(models.Model):
     )
     vendor_number = models.BigIntegerField(
         blank=True,
-        null=True
+        null=True,
+        unique=True,
     )
     alternate_id = models.IntegerField(
         blank=True,
@@ -125,6 +126,10 @@ class PartnerOrganization(models.Model):
         null=True,
         verbose_name=u'Risk Rating'
     )
+    type_of_assessment = models.CharField(
+        max_length=50,
+        null=True,
+    )
     core_values_assessment_date = models.DateField(
         blank=True, null=True,
         verbose_name=u'Date positively assessed against core values'
@@ -138,9 +143,44 @@ class PartnerOrganization(models.Model):
 
     class Meta:
         ordering = ['name']
+        unique_together = ('name', 'vendor_number')
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def latest_assessment(self):
+        assessment = self.assessments.last()
+        if assessment is None:
+            return 'Missing'
+        else:
+            return assessment.type
+
+    @property
+    def micro_assessment_needed(self):
+        """
+        Returns Yes if:
+        1. type of assessment field is 'high risk assumed';
+        2. planned amount is >$100K and type of assessment is 'simplified checklist' or risk rating is 'not required';
+        3. risk rating is 'low, medium, significant, high', type of assessment is 'ma' or 'negative audit results'
+            and date is older than 54 months.
+        return 'missing' if ma is not attached in the Assessment and Audit record in the Partner screen.
+        Displays No in all other instances.
+        :return:
+        """
+        micro_assessment = self.assessments.filter(type=u'Micro Assessment').order_by('completed_date').last()
+        if self.type_of_assessment == 'High Risk Assumed':
+            return 'Yes'
+        elif self.planned_cash_transfers > 100000.00 \
+            and self.type_of_assessment == 'Simplified Checklist' or self.rating == 'Not Required':
+            return 'Yes'
+        elif self.rating in [LOW, MEDIUM, SIGNIFICANT, HIGH] \
+            and self.type_of_assessment in ['Micro Assessment', 'Negative Audit Results'] \
+            and micro_assessment.completed_date < datetime.date.today() - datetime.timedelta(days=1642):
+            return 'Yes'
+        elif micro_assessment is None:
+            return 'Missing'
+        return 'No'
 
     @property
     def hact_min_requirements(self):
@@ -149,10 +189,10 @@ class PartnerOrganization(models.Model):
         cash_transferred = self.actual_cash_transferred
         if cash_transferred <= 50000.00:
             programme_visits = 1
-        elif cash_transferred > 50000.00 and cash_transferred <= 100000.00:
+        elif 50000.00 < cash_transferred <= 100000.00:
             programme_visits = 1
             spot_checks = 1
-        elif cash_transferred > 100000.00 and cash_transferred <= 350000.00:
+        elif 100000.00 < cash_transferred <= 350000.00:
             if self.rating in [u'Low', u'Medium']:
                 programme_visits = 1
                 spot_checks = 1
@@ -396,6 +436,16 @@ class Recommendation(models.Model):
         verbose_name_plural = 'Key recommendations'
 
 
+def get_agreement_path(instance, filename):
+    return '/'.join(
+        [connection.schema_name,
+         'file_attachments',
+         'agreements',
+         str(instance.id),
+         filename]
+    )
+
+
 class Agreement(TimeStampedModel):
 
     PCA = u'PCA'
@@ -422,7 +472,7 @@ class Agreement(TimeStampedModel):
         help_text=u'Reference Number'
     )
     attached_agreement = models.FileField(
-        upload_to=u'agreements',
+        upload_to=get_agreement_path,
         blank=True,
     )
     start = models.DateField(null=True, blank=True)
@@ -446,7 +496,7 @@ class Agreement(TimeStampedModel):
         blank=True, null=True,
     )
 
-    #bank information
+    # bank information
     bank_name = models.CharField(max_length=255, null=True, blank=True)
     bank_address = models.CharField(
         max_length=256L,
@@ -481,20 +531,33 @@ class Agreement(TimeStampedModel):
 
     @property
     def reference_number(self):
-        year = self.year
-        objects = list(Agreement.objects.filter(
-            created__year=year,
-            agreement_type=self.agreement_type
-        ).order_by('created').values_list('id', flat=True))
-        sequence = '{0:02d}'.format(objects.index(self.id) + 1 if self.id in objects else len(objects) + 1)
-        number = u'{code}/{type}{year}{seq}{version}'.format(
-            code=connection.tenant.country_short_code or '',
-            type=self.agreement_type,
-            year=year,
-            seq=sequence,
-            version=u'-{0:02d}'.format(self.amendments_log.last().amendment_number) if self.amendments_log.last() else ''
+        if self.agreement_number:
+            number = self.agreement_number
+        else:
+            objects = list(Agreement.objects.filter(
+                created__year=self.year,
+                agreement_type=self.agreement_type
+            ).order_by('created').values_list('id', flat=True))
+            sequence = '{0:02d}'.format(objects.index(self.id) + 1 if self.id in objects else len(objects) + 1)
+            number = u'{code}/{type}{year}{seq}'.format(
+                code=connection.tenant.country_short_code or '',
+                type=self.agreement_type,
+                year=self.year,
+                seq=sequence,
+            )
+        return u'{}{}'.format(
+            number,
+            u'-{0:02d}'.format(self.amendments_log.last().amendment_number)
+            if self.amendments_log.last() else ''
         )
-        return number
+
+    def save(self, **kwargs):
+
+        # commit the reference number to the database once the agreement is signed
+        if self.signed_by_unicef_date and not self.agreement_number:
+            self.agreement_number = self.reference_number
+
+        super(Agreement, self).save(**kwargs)
 
 
 class AuthorizedOfficer(models.Model):
@@ -577,8 +640,7 @@ class PCA(AdminURLMixin, models.Model):
     )
     number = models.CharField(
         max_length=45L,
-        blank=True,
-        default=u'UNASSIGNED',
+        blank=True, null=True,
         help_text=u'Document Reference Number'
     )
     title = models.CharField(max_length=256L)
@@ -627,7 +689,7 @@ class PCA(AdminURLMixin, models.Model):
     signed_by_unicef_date = models.DateField(null=True, blank=True)
     signed_by_partner_date = models.DateField(null=True, blank=True)
 
-    # contacts
+    # contacts #TODO: Remove
     unicef_mng_first_name = models.CharField(max_length=64L, blank=True)
     unicef_mng_last_name = models.CharField(max_length=64L, blank=True)
     unicef_mng_email = models.CharField(max_length=128L, blank=True)
@@ -644,6 +706,7 @@ class PCA(AdminURLMixin, models.Model):
         blank=True
     )
 
+    #TODO: Remove
     partner_mng_first_name = models.CharField(max_length=64L, blank=True)
     partner_mng_last_name = models.CharField(max_length=64L, blank=True)
     partner_mng_email = models.CharField(max_length=128L, blank=True)
@@ -773,25 +836,28 @@ class PCA(AdminURLMixin, models.Model):
 
     @property
     def reference_number(self):
-        if self.partnership_type == PCA.SSFA:
-            return self.agreement.reference_number
+        if self.partnership_type in [Agreement.SSFA, Agreement.MOU]:
+            number = self.agreement.reference_number
+        elif self.number:
+            number = self.number
         else:
-            year = self.year
             objects = list(PCA.objects.filter(
                 partner=self.partner,
-                created_at__year=year,
+                created_at__year=self.year,
                 partnership_type=self.partnership_type
             ).order_by('created_at').values_list('id', flat=True))
             sequence = '{0:02d}'.format(objects.index(self.id) + 1 if self.id in objects else len(objects) + 1)
-            number = u'{agreement}/{type}{year}{seq}{version}'.format(
+            number = u'{agreement}/{type}{year}{seq}'.format(
                 agreement=self.agreement.reference_number if self.id and self.agreement else '',
                 type=self.partnership_type,
-                year=year,
-                seq=sequence,
-                version=u'-{0:02d}'.format(self.amendments_log.last().amendment_number)
-                if self.amendments_log.last() else ''
+                year=self.year,
+                seq=sequence
             )
-            return number
+        return u'{}{}'.format(
+            number,
+            u'-{0:02d}'.format(self.amendments_log.last().amendment_number)
+            if self.amendments_log.last() else ''
+        )
 
     @property
     def planned_cash_transfers(self):
@@ -843,6 +909,14 @@ class PCA(AdminURLMixin, models.Model):
             trip__travel_type=u'spot_check'
         ).count()
 
+    def save(self, **kwargs):
+
+        # commit the referece number to the database once the intervention is signed
+        if self.signed_by_unicef_date and not self.number:
+            self.number = self.reference_number
+
+        super(PCA, self).save(**kwargs)
+
     @classmethod
     def get_active_partnerships(cls):
         return cls.objects.filter(current=True, status=cls.ACTIVE)
@@ -868,6 +942,7 @@ class PCA(AdminURLMixin, models.Model):
                 *recipients
             )
 
+        # attach any FCs immediately
         commitments = FundingCommitment.objects.filter(fr_number=instance.fr_number)
         for commit in commitments:
             commit.intervention = instance
@@ -1245,7 +1320,7 @@ class DistributionPlan(models.Model):
         related_name='distribution_plans'
     )
     item = models.ForeignKey(SupplyItem)
-    location = models.ForeignKey(Region)
+    site = models.ForeignKey(Location, null=True)
     quantity = models.PositiveIntegerField(
         help_text=u'Quantity required for this location'
     )
@@ -1254,22 +1329,25 @@ class DistributionPlan(models.Model):
         verbose_name=u'Send to partner?'
     )
     sent = models.BooleanField(default=False)
+    document = JSONField(null=True, blank=True)
     delivered = models.IntegerField(default=0)
 
     def __unicode__(self):
         return u'{}-{}-{}-{}'.format(
             self.partnership,
             self.item,
-            self.location,
+            self.site,
             self.quantity
         )
 
     @classmethod
     def send_distribution(cls, sender, instance, created, **kwargs):
 
-        if instance.send and not instance.sent:
-            set_unisupply_distribution.delay(instance)
-
+        if instance.send and instance.sent is False:
+            set_unisupply_distribution.delay(instance.id)
+        elif instance.send and instance.sent:
+            instance.sent = False
+            instance.save()
 
 post_save.connect(DistributionPlan.send_distribution, sender=DistributionPlan)
 

@@ -1,28 +1,15 @@
 __author__ = 'jcranwellward'
 
-import os
-import json
-import requests
 import datetime
+import json
+import os
 
-from django.db import connection
+import requests
 from django.conf import settings
-from django.template.defaultfilters import slugify
-
+from django.db import connection
 from requests.auth import HTTPBasicAuth
-from tenant_schemas.utils import tenant_context
 
 from EquiTrack.celery import app
-from users.models import Country
-
-
-@app.task
-def send(message):
-    if settings.SLACK_URL:
-        requests.post(
-            settings.SLACK_URL,
-            data=json.dumps({'text': message})
-        )
 
 
 def set_docs(docs):
@@ -63,48 +50,47 @@ def set_unisupply_user(username, password):
 
 
 @app.task
-def set_unisupply_distribution(distribution_plan):
+def set_unisupply_distribution(distribution_plan_id):
+    """
+    Creates or edits a distibution document in Couchbase
+    """
+    from partners.models import DistributionPlan
+    distribution_plan = DistributionPlan.objects.get(id=distribution_plan_id)
 
-        response = set_docs([
+    doc = distribution_plan.document if distribution_plan.document else {
+        "country": connection.schema_name,
+        "distribution_id": distribution_plan.id,
+        "intervention": distribution_plan.partnership.__unicode__(),
+        "partner_name": distribution_plan.partnership.partner.short_name,
+        "icon": "institution",
+        "criticality": "0",
+        "item_list": [
             {
-                "_id": slugify("{} {} {} {}".format(
-                    distribution_plan.partnership,
-                    distribution_plan.item,
-                    distribution_plan.location,
-                    distribution_plan.quantity
-                )),
-                "country": connection.schema_name,
-                "distribution_id": distribution_plan.id,
-                "intervention": "{}: {}".format(
-                    distribution_plan.partnership.number,
-                    distribution_plan.partnership.title),
-                "channels": [distribution_plan.partnership.partner.short_name.lower()],
-                "partner_name": distribution_plan.partnership.partner.short_name,
-                "icon": "institution",
-                "criticality": "0",
-                "item_list": [
-                    {
-                        "item_type": distribution_plan.item.name,
-                        "quantity": distribution_plan.quantity,
-                        "delivered": 0
-                    }
-                ],
-                "location": {
-                    "location_type": distribution_plan.location.gateway.name,
-                    "p_code": distribution_plan.location.p_code,
-                    "p_code_name": distribution_plan.location.name,
-                },
-                "type": "distribution",
-                "completed": False,
-                "creation_date": datetime.datetime.now().isoformat(),
-                "name": distribution_plan.location.name,
+                "item_type": distribution_plan.item.name,
+                "quantity": distribution_plan.quantity,
+                "delivered": 0
             }
-        ])
-        if response.status_code in [requests.codes.ok, requests.codes.created]:
+        ],
+        "location": {
+            "location_type": distribution_plan.site.gateway.name,
+            "p_code": distribution_plan.site.p_code,
+            "p_code_name": distribution_plan.site.name,
+        },
+        "type": "distribution",
+        "name": distribution_plan.site.name,
+        "completed": False,
+        "creation_date": datetime.datetime.now().isoformat()
+    }
 
-            distribution_plan.send = False
-            distribution_plan.sent = True
-            distribution_plan.save()
+    doc["item_list"][0]["quantity"] = distribution_plan.quantity
+    doc["item_list"][0]["delivered"] = distribution_plan.delivered
+
+    response = set_docs([doc])
+    if response.status_code in [requests.codes.ok, requests.codes.created]:
+        #TODO: Check if it was actually saved by couchbase
+        distribution_plan.send = False
+        distribution_plan.sent = True
+        distribution_plan.save()
 
         return response.text
 
@@ -121,26 +107,20 @@ def import_docs(**kwargs):
         auth=HTTPBasicAuth(settings.COUCHBASE_USER, settings.COUCHBASE_PASS)
     ).json()
 
-    countries = Country.objects.all().exclude(schema_name='public')
-
-    for country in countries:
-        with tenant_context(country):
-
-            for row in data['rows']:
-                if 'distribution_id' in row['doc']:
-                    distribution_id = row['doc']['distribution_id']
-                    try:
-                        distribution = DistributionPlan.objects.get(
-                            id=distribution_id
-                        )
-                        distribution.delivered = row['doc']['item_list'][0]['delivered']
-                        distribution.save()
-                    except DistributionPlan.DoesNotExist:
-                        print 'Distribution ID {} not found for Country {}'.format(
-                            distribution_id, country.name
-                        )
-                    except Exception as exp:
-                        print exp.message
-
-
-
+    for row in data['rows']:
+        if 'distribution_id' in row['doc']:
+            distribution_id = row['doc']['distribution_id']
+            try:
+                connection.set_schema(row['doc']['country'])
+                distribution = DistributionPlan.objects.get(
+                    id=distribution_id
+                )
+                distribution.delivered = row['doc']['item_list'][0]['delivered']
+                distribution.document = row['doc']
+                distribution.save()
+            except DistributionPlan.DoesNotExist:
+                print 'Distribution ID {} not found for Country {}'.format(
+                    distribution_id, row['doc']['country']
+                )
+            except Exception as exp:
+                print exp.message
