@@ -193,14 +193,14 @@ class PartnerOrganization(models.Model):
             programme_visits = 1
             spot_checks = 1
         elif 100000.00 < cash_transferred <= 350000.00:
-            if self.rating in [u'Low', u'Medium']:
+            if self.rating in [LOW, MEDIUM]:
                 programme_visits = 1
                 spot_checks = 1
             else:
                 programme_visits = 2
                 spot_checks = 2
         else:
-            if self.rating in [u'Low', u'Medium']:
+            if self.rating in [LOW, MEDIUM]:
                 programme_visits = 2
                 spot_checks = 2
             else:
@@ -275,10 +275,11 @@ class PartnerOrganization(models.Model):
     @classmethod
     def create_user(cls, sender, instance, created, **kwargs):
 
-        set_unisupply_user.delay(
-            instance.short_name,
-            instance.alternate_name
-        )
+        if instance.short_name and instance.alternate_name:
+            set_unisupply_user.delay(
+                instance.short_name,
+                instance.alternate_name
+            )
 
 post_save.connect(PartnerOrganization.create_user, sender=PartnerOrganization)
 
