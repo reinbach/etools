@@ -118,11 +118,32 @@ class ResultChainSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResultChain
 
+class LocationSerializer(serializers.Serializer):
+
+    latitude = serializers.CharField(source='geo_point.y')
+    longitude = serializers.CharField(source='geo_point.x')
+    location_name = serializers.CharField(source='name')
+    location_type = serializers.CharField(source='gateway.name')
+    gateway_id = serializers.CharField(source='gateway.id')
+    p_code = serializers.CharField()
+    parterships = serializers.SerializerMethodField('get_pcas')
+
+    def get_pcas(self, location):
+        pcas = set([
+            loc.pca for loc in
+            location.gwpcalocation_set.all()
+        ])
+        return InterventionSerializer(pcas, many=True).data
+
+    class Meta:
+        model = Location
+
 
 class IndicatorReportSerializer(serializers.ModelSerializer):
     disaggregated = serializers.BooleanField(read_only=True)
     partner_staff_member = serializers.SerializerMethodField(read_only=True)
     indicator = serializers.SerializerMethodField(read_only=True)
+    location_object = LocationSerializer(source='location', read_only=True)
     disaggregation = serializers.JSONField()
 
 
@@ -192,27 +213,6 @@ class InterventionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PCA
-
-
-class LocationSerializer(serializers.Serializer):
-
-    latitude = serializers.CharField(source='geo_point.y')
-    longitude = serializers.CharField(source='geo_point.x')
-    location_name = serializers.CharField(source='name')
-    location_type = serializers.CharField(source='gateway.name')
-    gateway_id = serializers.CharField(source='gateway.id')
-    p_code = serializers.CharField()
-    parterships = serializers.SerializerMethodField('get_pcas')
-
-    def get_pcas(self, location):
-        pcas = set([
-            loc.pca for loc in
-            location.gwpcalocation_set.all()
-        ])
-        return InterventionSerializer(pcas, many=True).data
-
-    class Meta:
-        model = Location
 
 
 class GWLocationSerializer(serializers.ModelSerializer):

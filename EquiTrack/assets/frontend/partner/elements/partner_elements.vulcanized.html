@@ -40234,10 +40234,10 @@ commonBv.globals = {
       // console.log('total changed', (typeof totValue));
       var res = {
         total: this.mainTotal,
-        breakdown: this.breakdowns
+        breakdown: this.breakdowns ? this.breakdowns : {}
       };
-      if ((totValue !== 0) && (totValue)){
-        this.breakdowns.total = this.disLevel ? this.total : null;
+      if ((this.disLevel) && (totValue !== 0) && (totValue)){
+        this.breakdowns.total = this.total;
         res.breakdown = this.breakdowns;
       }
 
@@ -41306,13 +41306,13 @@ commonBv.interventions = {
                 <paper-radio-button class="green" name="ontrack">On Track</paper-radio-button>
                 <paper-radio-button class="yellow" name="constrained">Constrained</paper-radio-button>
                 <paper-radio-button class="red" name="noprogress">No Progress</paper-radio-button>
-                <paper-radio-button name="met">Target Met</paper-radio-button>
+                <paper-radio-button name="targetmet">Target Met</paper-radio-button>
               </paper-radio-group>
             </div>
             
             <value-breakdown class="reportInput" id="valBreakdown" repres="{{selectedNumberResult}}" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
             <div class="narativeReport">
-              <paper-textarea value="{{selectedNarative}}" label="Optional Narative (this text area grows as you type)"></paper-textarea>
+              <paper-textarea value="{{selectedRemarks}}" label="Optional Narrative (this text area grows as you type)"></paper-textarea>
             </div>
           </div>
         </div>
@@ -41358,7 +41358,7 @@ commonBv.interventions = {
       selectedNumberResult: {
         type: Object
       },
-      selectedNarative: Object
+      selectedRemarks: Object
 
     },
     _removeFromView: function(ev){
@@ -41383,7 +41383,7 @@ commonBv.interventions = {
         location: this.selectedLocationReport,
         number: this.selectedNumberResult,
         status: this.selectedStatus,
-        narative: this.selectedNarative
+        remarks: this.selectedRemarks,
       };
     }
   });
@@ -41767,7 +41767,8 @@ commonBv.interventions = {
                   
                   
                   <div class="shortText">
-                    Location: {{report.location}}, Reported #: {{report.total}}
+                    Location: {{report.location_object.location_name}}, Reported #: {{report.total}},
+                    narrative: {{report.remarks}}, Status: {{report.report_status}}
                   </div>
 
                 </div>
@@ -41912,6 +41913,8 @@ commonBv.interventions = {
       // console.log(myRep);
       myReq.body = {
         'result_chain': this.rcId,
+        'report_status': myRep.status,
+        'remarks': myRep.remarks,
         'disaggregation': myRep.number.breakdown,
         'total': myRep.number.total,
         'start': this.$.timeFrame.from,
