@@ -41524,7 +41524,8 @@ commonBv.interventions = {
   }
   </style>
   
-    
+    <etools-ajax auto="" id="ajaxPost" on-response="handleSubmitResponse">
+    </etools-ajax>
 
   <h1 hidden$="[[!pageLoading]]">
       Page is loading now...
@@ -41556,7 +41557,7 @@ commonBv.interventions = {
     </paper-button>
   </div>
   <div hidden$="[[reportingActive]]">
-    <timeframe-picker label="Reporting Period" class="timeFrame"></timeframe-picker>
+    <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
   <hr hidden$="[[reportingActive]]">
   <template is="dom-repeat" id="indicatorsList" items="[[outputs]]" as="out">
@@ -41565,7 +41566,7 @@ commonBv.interventions = {
       <div class="indicatorsBlock">
 
         <template is="dom-repeat" items="[[out.indicators]]" as="rc">
-          <etools-indicator rc="{{rc}}" reporting-active="{{reportingActive}}"></etools-indicator>
+          <etools-indicator class="indicator" rc="{{rc}}" reporting-active="{{reportingActive}}"></etools-indicator>
         </template>
 
       </div>
@@ -41573,7 +41574,7 @@ commonBv.interventions = {
   </template>
 
   <div hidden$="[[reportingActive]]" class="reportButtons">
-    <paper-button raised="" class="green" disabled="{{submitDisabled}}">Submit Report</paper-button>
+    <paper-button raised="" class="green" on-tap="_submitReport" disabled="{{submitDisabled}}">Submit Report</paper-button>
   </div>
   </paper-material>
  
@@ -41649,7 +41650,41 @@ commonBv.interventions = {
     },
     _reportIcon: function(v) {
       return v ? 'check' : 'clear';
-    }
+    },
+    handleSubmitResponse: function(rsp){
+      console.log('handling submit', rsp.detail);
+      
+    },
+
+    _submitReport: function() {
+      var myReq = this.$.ajaxPost;
+      var tf = this.$.timeFrame;
+      var body = [];
+      var inds = Array.from(this.querySelectorAll('.indicator'));
+
+      inds.forEach(function(el) {
+        var rep = el.getReport();
+        body.push({
+          'result_chain': el.rc.id,
+          'report_status': rep.status,
+          'remarks': rep.remarks,
+          'disaggregation': rep.number.breakdown,
+          'total': rep.number.total,
+          'start': tf.from,
+          'end': tf.to,
+          'location': rep.location.id
+        });
+
+      });
+      // console.log(myRep);
+      myReq.body = body;
+      myReq.method = 'POST';
+      myReq.url = this.getEp('newIndicatorReport', {
+        interventionId: this.interventionId, 
+        rcId: this.rcId
+      }).url;
+      myReq.sendPostRequest();
+    },
   });
 })();
 
@@ -41897,18 +41932,8 @@ commonBv.interventions = {
     },
     _submitReport: function() {
       var myReq = this.$.ajaxPost;
-      //TODO: Validate for location
-      // if (!this._validateSubmision()){
-      //   return;
-      // }
-      // myReq.body = {
-      //   'result_chain': this.rcId,
-      //   'disaggregation': {},
-      //   'total': this.$.reportTotal.value,
-      //   'start': this.$.timeFrame.from,
-      //   'end': this.$.timeFrame.to,
-      //   'location': this.$.locationSelected.value
-      // };
+      //TODO: Validate
+      
       var myRep = this.$.indicator.getReport();
       // console.log(myRep);
       myReq.body = {
