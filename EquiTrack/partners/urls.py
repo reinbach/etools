@@ -47,8 +47,11 @@ pcaamendments_api.register(r'amendments', AmendmentLogViewSet, base_name='interv
 results_api = routers.NestedSimpleRouter(interventions_api, r'interventions', lookup='intervention')
 results_api.register(r'results', ResultChainViewSet, base_name='intervention-results')
 
-reports_api = routers.NestedSimpleRouter(results_api, r'results', lookup='result')
-reports_api.register(r'reports', IndicatorReportViewSet, base_name='intervention-reports')
+intervention_reports_api = routers.NestedSimpleRouter(results_api, r'results', lookup='result')
+intervention_reports_api.register(r'reports', IndicatorReportViewSet, base_name='intervention-reports')
+
+bulk_reports_api = routers.SimpleRouter()
+bulk_reports_api.register(r'bulk_reports', IndicatorReportViewSet, base_name='bulk-reports')
 
 
 urlpatterns = patterns(

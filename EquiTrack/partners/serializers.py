@@ -158,6 +158,16 @@ class IndicatorReportSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # TODO: handle validation
+        # result_chain.partner.partner.id
+        user = self.context['request'].user
+        rc = data.get('result_chain')
+        # make sure only a partner staff member can create a new submission on a partner result chain
+        # we could allow superusers by checking for superusers first
+        if not (user or rc) or \
+                (user.profile.partner_staff_member not in
+                    rc.partnership.partner.partnerstaffmember_set.values_list('id', flat=True)):
+            raise Exception('hell')
+
         return data
 
     def create(self, validated_data):

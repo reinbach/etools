@@ -316,10 +316,7 @@
       // console.log(myRep);
       myReq.body = body;
       myReq.method = 'POST';
-      myReq.url = this.getEp('newIndicatorReport', {
-        interventionId: this.interventionId, 
-        rcId: this.rcId
-      }).url;
+      myReq.url = this.getEp('bulkIndicatorReport').url;
       myReq.sendPostRequest();
     },
   });
