@@ -13,7 +13,6 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from jsonfield import JSONField
-from filer.fields.file import FilerFileField
 from smart_selects.db_fields import ChainedForeignKey
 from model_utils.models import (
     TimeFramedModel,
@@ -60,7 +59,7 @@ RISK_RATINGS = (
 )
 
 
-class PartnerOrganization(models.Model):
+class PartnerOrganization(AdminURLMixin, models.Model):
 
     partner_type = models.CharField(
         max_length=50,
@@ -148,13 +147,8 @@ class PartnerOrganization(models.Model):
     def __unicode__(self):
         return self.name
 
-    @property
-    def latest_assessment(self):
-        assessment = self.assessments.last()
-        if assessment is None:
-            return 'Missing'
-        else:
-            return assessment.type
+    def latest_assessment(self, type):
+        return self.assessments.filter(type=type).order_by('completed_date').last()
 
     @property
     def micro_assessment_needed(self):
@@ -184,8 +178,7 @@ class PartnerOrganization(models.Model):
 
     @property
     def hact_min_requirements(self):
-        audit = 'No'
-        programme_visits = spot_checks = 0
+        programme_visits = spot_checks = audits = 0
         cash_transferred = self.actual_cash_transferred
         if cash_transferred <= 50000.00:
             programme_visits = 1
@@ -207,9 +200,17 @@ class PartnerOrganization(models.Model):
                 programme_visits = 4
                 spot_checks = 3
         if self.total_cash_transferred > 500000.00:
-            audit = 'Yes'
+            audits = 1
+            current_cycle = ResultStructure.current()
+            last_audit = self.latest_assessment(u'Scheduled Audit report')
+            if last_audit and current_cycle.from_date < last_audit.completed_date < current_cycle.to_date:
+                audits = 0
 
-        return programme_visits, spot_checks, audit
+        return {
+            'programme_visits': programme_visits,
+            'spot_checks': spot_checks,
+            'audits': audits
+        }
 
     @property
     def planned_cash_transfers(self):
@@ -255,6 +256,15 @@ class PartnerOrganization(models.Model):
         return total[total.keys()[0]] or 0
 
     @property
+    def planned_visits(self):
+        planned = self.documents.filter(
+            status=PCA.ACTIVE
+        ).aggregate(
+            models.Sum('planned_visits')
+        )
+        return planned[planned.keys()[0]] or 0
+
+    @property
     def programmatic_visits(self):
         from trips.models import LinkedPartner
         return LinkedPartner.objects.filter(
@@ -271,6 +281,9 @@ class PartnerOrganization(models.Model):
             trip__status=u'completed',
             trip__travel_type=u'spot_check'
         ).count()
+
+    def audits(self):
+        return self.assessments.filter(type=u'Scheduled Audit report').count()
 
     @classmethod
     def create_user(cls, sender, instance, created, **kwargs):
@@ -741,6 +754,7 @@ class PCA(AdminURLMixin, models.Model):
     cash_for_supply_budget = models.IntegerField(null=True, blank=True, default=0)
     total_cash = models.IntegerField(null=True, blank=True, verbose_name='Total Budget', default=0)
     fr_number = models.CharField(max_length=50, null=True, blank=True)
+    planned_visits = models.IntegerField(default=0)
 
     # meta fields
     sectors = models.CharField(max_length=255, null=True, blank=True)
@@ -889,8 +903,8 @@ class PCA(AdminURLMixin, models.Model):
         """
         cp = ResultStructure.current()
         total = self.funding_commitments.filter(
-            end__gte=cp.to_date,
-            end__lte=cp.to_date
+            end__gte=cp.from_date,
+            end__lte=cp.to_date,
         ).aggregate(
             models.Sum('expenditure_amount')
         )
@@ -1196,7 +1210,6 @@ class PCAFile(models.Model):
 
     pca = models.ForeignKey(PCA, related_name='attachments')
     type = models.ForeignKey(FileType)
-    file = FilerFileField(blank=True, null=True)
     attachment = models.FileField(
         max_length=255,
         upload_to=get_file_path

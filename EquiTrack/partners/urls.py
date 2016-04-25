@@ -21,10 +21,29 @@ from .views import (
     ResultChainViewSet,
     IndicatorReportViewSet,
     PcaPDFView,
+    PartnerOrganizationsViewSet,
+    PartnerStaffMembersViewSet,
+    AgreementViewSet,
 )
 
-interventions_api = routers.SimpleRouter()
+partners_api = routers.SimpleRouter()
+partners_api.register(r'partners', PartnerOrganizationsViewSet, base_name='partnerorganizations')
+
+staffm_api = routers.NestedSimpleRouter(partners_api, r'partners', lookup='partner')
+staffm_api.register(r'staff-members', PartnerStaffMembersViewSet, base_name='partnerstaffmembers')
+
+agreement_api = routers.NestedSimpleRouter(partners_api, r'partners', lookup='partner')
+agreement_api.register(r'agreements', AgreementViewSet, base_name='agreements')
+
+# interventions_api = routers.SimpleRouter()
+interventions_api = routers.NestedSimpleRouter(partners_api, r'partners', lookup='partner')
 interventions_api.register(r'interventions', InterventionsViewSet, base_name='interventions')
+
+simple_interventions_api = routers.SimpleRouter()
+simple_interventions_api.register(r'interventions', InterventionsViewSet, base_name='interventions')
+
+simple_results_api = routers.NestedSimpleRouter(simple_interventions_api, r'interventions', lookup='intervention')
+simple_results_api.register(r'results', ResultChainViewSet, base_name='simpleintervention-results')
 
 pcasectors_api = routers.NestedSimpleRouter(interventions_api, r'interventions', lookup='intervention')
 pcasectors_api.register(r'sectors', PCASectorViewSet, base_name='intervention-sectors')
@@ -47,7 +66,7 @@ pcaamendments_api.register(r'amendments', AmendmentLogViewSet, base_name='interv
 results_api = routers.NestedSimpleRouter(interventions_api, r'interventions', lookup='intervention')
 results_api.register(r'results', ResultChainViewSet, base_name='intervention-results')
 
-intervention_reports_api = routers.NestedSimpleRouter(results_api, r'results', lookup='result')
+intervention_reports_api = routers.NestedSimpleRouter(simple_results_api, r'results', lookup='result')
 intervention_reports_api.register(r'reports', IndicatorReportViewSet, base_name='intervention-reports')
 
 bulk_reports_api = routers.SimpleRouter()

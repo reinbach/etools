@@ -62,11 +62,25 @@ if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY and AZURE_CONTAINER:
         },
     }
 
+    from storages.backends.azure_storage import AzureStorage
+    storage = AzureStorage()
+    with storage.open('saml/certs/saml.key') as key, \
+            storage.open('saml/certs/sp.crt') as crt:
+        with open('EquiTrack/saml/certs/saml.key', 'w+') as new_key, \
+                open('EquiTrack/saml/certs/sp.crt', 'w+') as new_crt:
+            new_key.write(key.read())
+            new_crt.write(crt.read())
+
 
 SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-#LOGIN_URL = '/saml2/login/'
+
 LOGIN_URL = '/login/'
 SAML_ATTRIBUTE_MAPPING = {
     'upn': ('username',),
@@ -156,8 +170,8 @@ SAML_CONFIG = {
     },
     'valid_for': 24,  # how long is our metadata valid
 }
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-SAML_SIGNED_LOGOUT = True
+#SAML_SIGNED_LOGOUT = True
+
 ########## JWT AUTH CONFIGURATION
 certificate_text = open(join(DJANGO_ROOT, 'saml/stspem.cer'), 'r').read()
 certificate = load_pem_x509_certificate(certificate_text, default_backend())

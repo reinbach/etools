@@ -25746,7 +25746,7 @@ var config = {
       template: '/api/interventions/<%=id%>/'
     },
     interventions: {
-      template: '/api/partners/interventions/',
+      template: '/api/interventions/',
       exp: 1*1000*60
     },
     resultChainDetails: {
@@ -25754,6 +25754,9 @@ var config = {
     },
     newIndicatorReport: {
       template: '/api/interventions/<%=interventionId%>/results/<%=rcId%>/reports'
+    },
+    bulkIndicatorReport: {
+      template: '/api/partners/reports'
     }
   },
   paths: {
@@ -41679,10 +41682,7 @@ commonBv.interventions = {
       // console.log(myRep);
       myReq.body = body;
       myReq.method = 'POST';
-      myReq.url = this.getEp('newIndicatorReport', {
-        interventionId: this.interventionId, 
-        rcId: this.rcId
-      }).url;
+      myReq.url = this.getEp('bulkIndicatorReport').url;
       myReq.sendPostRequest();
     },
   });
