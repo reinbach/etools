@@ -126,7 +126,7 @@ urlpatterns = patterns(
     url(r'^api/', include(pcaamendments_api.urls)),
     url(r'^api/', include(pcalocations_api.urls)),
     url(r'^api/', include(intervention_reports_api.urls)),
-    url(r'^api/partners/', include(bulk_reports_api.urls)),
+    url(r'^api/', include(bulk_reports_api.urls)),
     url(r'^api/', include(trips2_api.urls)),
     url(r'^api/', include(trips2files_api.urls)),
     url(r'^api/docs/', include('rest_framework_swagger.urls')),

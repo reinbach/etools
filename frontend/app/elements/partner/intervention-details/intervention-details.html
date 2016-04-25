@@ -267,6 +267,10 @@
       reportingActive: {
         type: Boolean,
         value: true
+      },
+      submitDisabled: {
+        type: Boolean,
+        value: false
       }
     },
     changeUrl: function(){
@@ -298,8 +302,10 @@
       var tf = this.$.timeFrame;
       var body = [];
       var inds = Array.from(this.querySelectorAll('.indicator'));
+      console.log(inds);
 
       inds.forEach(function(el) {
+        console.log(el);
         var rep = el.getReport();
         body.push({
           'result_chain': el.rc.id,

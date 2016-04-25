@@ -146,7 +146,6 @@ class IndicatorReportSerializer(serializers.ModelSerializer):
     location_object = LocationSerializer(source='location', read_only=True)
     disaggregation = serializers.JSONField()
 
-
     class Meta:
         model = IndicatorReport
 
