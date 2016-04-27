@@ -25747,7 +25747,7 @@ var config = {
     },
     interventions: {
       template: '/api/interventions/',
-      exp: 1*1000*60
+      exp: 1*1000*60  // cache for this amount of time (in milliseconds)
     },
     resultChainDetails: {
       template: '/api/interventions/<%=interventionId%>/results/<%=rcId%>/'
@@ -25846,6 +25846,7 @@ commonBv.globals = {
         window.location = this.getEp('login');
         return;
       }
+      window.alert('Page has not loaded sucessfully '+event.srcElement.url);
       this.fire('error', {
         request: event,
         error: error.error
@@ -41287,6 +41288,7 @@ commonBv.interventions = {
    /*paper-fab.red {
           --paper-fab-background: var(--paper-red-500);
         }*/
+    
   </style>
       <div class="">
         <div class="indicatorHeader">
@@ -42556,7 +42558,17 @@ commonBv.interventions = {
           color: var(--default-primary-color); /* variable defined in default-theme.html */
       }
   }
-
+  paper-button.green {
+    background-color: var(--paper-green-500);
+    color: white;
+  }
+  paper-button.red {
+    background-color: var(--paper-red-500);
+    color: white;
+  }
+  .reportButtons {
+    margin-top: 10px;
+  }
    
   </style>
   <etools-ajax auto="" id="ajaxPost" on-response="handleSubmitResponse">
@@ -42590,7 +42602,7 @@ commonBv.interventions = {
   
 
   
-  <div hidden$="[[reportingActive]]">
+  <div hidden$="{{!emptyTemplate}}">
     <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
 
@@ -42609,7 +42621,7 @@ commonBv.interventions = {
             
   </template>
 
-  <div hidden$="[[reportingActive]]" class="reportButtons">
+  <div hidden$="{{!emptyTemplate}}" class="reportButtons">
     <paper-button raised="" class="green" on-tap="_submitReport" disabled="{{submitDisabled}}">Submit Report</paper-button>
   </div>
 
@@ -42824,6 +42836,7 @@ commonBv.interventions = {
       return this.getEp('locationsAutocomplete').url;
     },
     handleSubmitResponse: function(rsp){
+      window.alert('Report submitted');
       console.log('handling submit', rsp.detail);
       
     },

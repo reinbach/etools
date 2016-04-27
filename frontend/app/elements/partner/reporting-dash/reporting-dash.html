@@ -110,7 +110,17 @@
           color: var(--default-primary-color); /* variable defined in default-theme.html */
       }
   }
-
+  paper-button.green {
+    background-color: var(--paper-green-500);
+    color: white;
+  }
+  paper-button.red {
+    background-color: var(--paper-red-500);
+    color: white;
+  }
+  .reportButtons {
+    margin-top: 10px;
+  }
    
   </style>
   <etools-ajax
@@ -151,7 +161,7 @@
   <!-- End Add indicator wizzard -->
 
   <!-- Display indicators founds in localstorage -->
-  <div hidden$="[[reportingActive]]">
+  <div hidden$="{{!emptyTemplate}}">
     <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
 
@@ -175,7 +185,7 @@
             
   </template>
 
-  <div hidden$="[[reportingActive]]" class="reportButtons">
+  <div hidden$="{{!emptyTemplate}}" class="reportButtons">
     <paper-button raised class="green" on-tap="_submitReport" disabled={{submitDisabled}}>Submit Report</paper-button>
   </div>
 
@@ -390,6 +400,7 @@
       return this.getEp('locationsAutocomplete').url;
     },
     handleSubmitResponse: function(rsp){
+      window.alert('Report submitted');
       console.log('handling submit', rsp.detail);
       
     },
