@@ -161,7 +161,7 @@
   <!-- End Add indicator wizzard -->
 
   <!-- Display indicators founds in localstorage -->
-  <div hidden$="{{!emptyTemplate}}">
+  <div hidden$="{{emptyTemplate}}">
     <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
 
@@ -185,7 +185,7 @@
             
   </template>
 
-  <div hidden$="{{!emptyTemplate}}" class="reportButtons">
+  <div hidden$="{{emptyTemplate}}" class="reportButtons">
     <paper-button raised class="green" on-tap="_submitReport" disabled={{submitDisabled}}>Submit Report</paper-button>
   </div>
 

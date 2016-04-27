@@ -1292,15 +1292,11 @@ class ResultChain(models.Model):
 
 class IndicatorReport(TimeStampedModel, TimeFramedModel):
 
-    ONTRACK = 'ontrack'
-    CONSTRAINED = 'constrained'
-    NOPROGRESS = 'noprogress'
-    TARGETMET = 'targetmet'
-    STATUS_CHOICES = (
-        (ONTRACK, 'On Track'),
-        (CONSTRAINED, 'Constrained'),
-        (NOPROGRESS, 'No Progress'),
-        (TARGETMET, 'Target Met')
+    STATUS_CHOICES = Choices(
+        ('ontrack', _('On Track')),
+        ('constrained', _('Constrained')),
+        ('noprogress', _('No Progress')),
+        ('targetmet', _('Target Met'))
     )
 
     # FOR WHOM / Beneficiary
@@ -1325,7 +1321,7 @@ class IndicatorReport(TimeStampedModel, TimeFramedModel):
     # Metadata
     #  - Remarks, Report Status
     remarks = models.TextField(blank=True, null=True)
-    report_status = models.CharField(choices=STATUS_CHOICES, default=ONTRACK, max_length=15)
+    report_status = models.CharField(choices=STATUS_CHOICES, default=STATUS_CHOICES.ontrack, max_length=15)
 
 
 class SupplyPlan(models.Model):

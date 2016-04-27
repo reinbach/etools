@@ -42602,7 +42602,7 @@ commonBv.interventions = {
   
 
   
-  <div hidden$="{{!emptyTemplate}}">
+  <div hidden$="{{emptyTemplate}}">
     <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
 
@@ -42621,7 +42621,7 @@ commonBv.interventions = {
             
   </template>
 
-  <div hidden$="{{!emptyTemplate}}" class="reportButtons">
+  <div hidden$="{{emptyTemplate}}" class="reportButtons">
     <paper-button raised="" class="green" on-tap="_submitReport" disabled="{{submitDisabled}}">Submit Report</paper-button>
   </div>
 
