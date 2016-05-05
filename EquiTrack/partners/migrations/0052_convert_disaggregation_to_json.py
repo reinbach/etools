@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
-import json
-def updateCountriesAvailable(apps, schema_editor):
+
+def updateResultChain(apps, schema_editor):
     """
         Make sure every user has their own countries available
     """
@@ -22,7 +22,6 @@ def updateCountriesAvailable(apps, schema_editor):
 
 def revert(apps, schema_editor):
     pass
-    #raise RuntimeError("reversing this migration not possible")
 
 
 class Migration(migrations.Migration):
@@ -32,5 +31,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(updateCountriesAvailable, reverse_code=revert),
+        migrations.RunPython(updateResultChain, reverse_code=revert),
     ]
