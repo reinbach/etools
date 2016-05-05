@@ -12,16 +12,23 @@ def updateResultChain(apps, schema_editor):
 
     for rc in ResultChain.objects.all():
 
-        if rc.disaggregation is None:
-            rc.disaggregation = '{}'
-        else:
+        if rc.disaggregation is not None:
             rc.disaggregation = '{' + rc.disaggregation.replace('=>', ':') + '}'
 
         rc.save()
 
 
 def revert(apps, schema_editor):
-    pass
+
+    ResultChain = apps.get_model("partners", "ResultChain")
+
+    for rc in ResultChain.objects.all():
+        if rc.disaggregation == '{}':
+            rc.disaggregation = None
+        if rc.disaggregation is not None:
+            rc.disaggregation = rc.disaggregation[1:-1].replace(':', '=>')
+
+        rc.save()
 
 
 class Migration(migrations.Migration):
