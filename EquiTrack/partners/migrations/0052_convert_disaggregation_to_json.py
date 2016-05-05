@@ -24,6 +24,8 @@ def revert(apps, schema_editor):
     ResultChain = apps.get_model("partners", "ResultChain")
 
     for rc in ResultChain.objects.all():
+        if rc.disaggregation == '{}':
+            rc.disaggregation = None
         if rc.disaggregation is not None:
             rc.disaggregation = rc.disaggregation[1:-1]
         rc.save()
