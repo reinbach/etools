@@ -42,7 +42,7 @@ packer_cache
 *.box
 
 Vagrantfile
-EquiTrack/saml/FederationMetadata.xml
+EquiTrack/EquiTrack/saml/FederationMetadata.xml
 
 *.tar
 
