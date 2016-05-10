@@ -640,15 +640,18 @@ class PartnershipForm(UserGroupForm):
             self.add_locations(p_codes, location_sector)
 
         if work_plan:
-            # make sure another workplan has not been uploaded already:
-            if self.instance.results and self.instance.results.count() > 0:
+            # make sure the status of the intervention is in process
+            if self.instance.status != PCA.IN_PROCESS:
                 raise ValidationError(
-                    u'A workplan has already been uploaded'
+                    u'After the intervention is signed, the workplan cannot be changed'
                 )
             if result_structure is None:
                 raise ValidationError(
                     u'Please select a result structure from the man info tab to import results against'
                 )
+            # make sure another workplan has not been uploaded already:
+            if self.instance.results and self.instance.results.count() > 0:
+                self.instance.results.all().delete()
             self.import_results_from_work_plan(work_plan)
 
         return cleaned_data
