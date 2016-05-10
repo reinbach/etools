@@ -108,6 +108,7 @@ class FileAttachmentSerializer(serializers.ModelSerializer):
             "id",
             "report",
             "type",
+            "caption",
             "object_id",
             "content_type",
             "trip",
@@ -381,10 +382,6 @@ class TripSerializer(serializers.ModelSerializer):
             'actionpoint_set',
             'trip_funds',
             'all_files',
-
-
-
-
         )
 
 

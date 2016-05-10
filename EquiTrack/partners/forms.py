@@ -437,6 +437,13 @@ class PartnershipForm(UserGroupForm):
             row_num += 1
             row = series.to_dict()
             labels = list(series.axes[0])  # get the labels in order
+
+            # check if there are correct time frames set on activities:
+            at_least_one_tf = [x for x in labels if 'TF_' in x]
+            if not at_least_one_tf:
+                raise ValidationError('There are no valid time frames for the activities,'
+                                      'please prefix activities with "TF_')
+
             try:
                 type = label.split()[0].strip()
                 statement = row.pop('Details').strip()
@@ -621,6 +628,11 @@ class PartnershipForm(UserGroupForm):
             self.add_locations(p_codes, location_sector)
 
         if work_plan:
+            # make sure another workplan has not been uploaded already:
+            if self.instance.results and self.instance.results.count() > 0:
+                raise ValidationError(
+                    u'A workplan has already been uploaded'
+                )
             if result_structure is None:
                 raise ValidationError(
                     u'Please select a result structure from the man info tab to import results against'
