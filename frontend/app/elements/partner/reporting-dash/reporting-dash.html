@@ -386,7 +386,7 @@
     _locationSelected: function() {
       // only if location is selected:
       if (!this.$.locationSelected){
-        window.alert('location is needed');
+        app.$.alert.showText('location is needed');
       }
       this._goToNextStep();
     },
@@ -400,7 +400,7 @@
       return this.getEp('locationsAutocomplete').url;
     },
     handleSubmitResponse: function(rsp){
-      window.alert('Report submitted');
+      app.$.alert.showText('Report submitted');
       console.log('handling submit', rsp.detail);
       
     },

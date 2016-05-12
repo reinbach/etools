@@ -65,6 +65,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template is="dom-bind" id="app">
   <global-data app-data="[[appData]]" user="{{user}}" permissions="{{permissions}}"></global-data>
   <etools-loading id="loading"></etools-loading>
+  <etools-alert id="alert"></etools-alert>
 
   <template is="dom-if" if='{{permissions.interventionsMenu}}'>
     <interventions-data id="interventionData" interventions={{interventions}}></interventions-data>

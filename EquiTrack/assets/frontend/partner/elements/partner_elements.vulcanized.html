@@ -25855,7 +25855,7 @@ commonBv.globals = {
         window.location = this.getEp('login');
         return;
       }
-      window.alert('Page has not loaded sucessfully '+event.srcElement.url);
+      app.$.alert.showText('Page has not loaded sucessfully '+event.srcElement.url);
       this.fire('error', {
         request: event,
         error: error.error
@@ -26488,6 +26488,67 @@ commonBv.globals = {
       return this.loadingShown !== 0 ? true : false;
     }
      
+  });
+</script><dom-module id="etools-alert" assetpath="common/etools-alert/">
+<style>
+
+</style>
+<template>
+
+  <paper-dialog id="dialog" class="" modal="" on-iron-overlay-closed="dismissDialog">
+    <paper-dialog-scrollable>
+      <div>
+        <h3>{{alertTitle}}</h3>
+        <hr>
+        <p>{{alertText}}</p>
+      </div>
+    <paper-dialog-scrollable>
+    <div class="buttons">
+      <paper-button dialog-dismiss="">Dismiss</paper-button>
+      
+    </div>
+  </paper-dialog-scrollable></paper-dialog-scrollable></paper-dialog>
+
+</template>
+  
+</dom-module>
+
+<script>
+ // jscs:disable
+  'use strict';
+  Polymer({
+    is: 'etools-alert',
+    properties: {
+      alertVisible: {
+        type: Boolean,
+        value: false
+      },
+      alertTitle: {
+        type: String,
+        value: 'Warning'
+      },
+      alertText: {
+        type: String,
+        value: 'Loading'
+      }
+    },
+    show: function() {
+      this.alertVisible = true;
+      this.$.dialog.toggle();
+    },
+    hide: function() {
+      this.alertVisible = false;
+    },
+    showText: function(alertText){
+      this.alertText = alertText;
+      this.show();
+    },
+    dismissDialog: function(event) {
+      // if (event.detail.confirmed) {
+      //   // do something if confirmed
+      // }
+      event.stopPropagation();
+    }
   });
 </script><dom-module id="user-page" assetpath="common/user-page/">
 
@@ -42471,11 +42532,11 @@ commonBv.interventions = {
     },
     _validateSubmision: function() {
       if (!this.$.locationSelected.value){
-        window.alert('Location needed');
+        app.$.alert.showText('Location needed');
         return false;
       }
       if (!this.$.reportTotal.value){
-        window.alert('Report Total needed');
+        app.$.alert.showText('Report Total needed');
         return false;
       }
       return true;
@@ -42964,7 +43025,7 @@ commonBv.interventions = {
     _locationSelectionDone: function() {
       // only if location is selected:
       if (!this.$.locationSelected){
-        window.alert('location is needed');
+        app.$.alert.showText('location is needed');
       }
       this._goToNextStep();
     },
@@ -43364,7 +43425,7 @@ commonBv.interventions = {
     _locationSelected: function() {
       // only if location is selected:
       if (!this.$.locationSelected){
-        window.alert('location is needed');
+        app.$.alert.showText('location is needed');
       }
       this._goToNextStep();
     },
@@ -43378,7 +43439,7 @@ commonBv.interventions = {
       return this.getEp('locationsAutocomplete').url;
     },
     handleSubmitResponse: function(rsp){
-      window.alert('Report submitted');
+      app.$.alert.showText('Report submitted');
       console.log('handling submit', rsp.detail);
       
     },

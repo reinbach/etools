@@ -271,11 +271,11 @@
     },
     _validateSubmision: function() {
       if (!this.$.locationSelected.value){
-        window.alert('Location needed');
+        app.$.alert.showText('Location needed');
         return false;
       }
       if (!this.$.reportTotal.value){
-        window.alert('Report Total needed');
+        app.$.alert.showText('Report Total needed');
         return false;
       }
       return true;
