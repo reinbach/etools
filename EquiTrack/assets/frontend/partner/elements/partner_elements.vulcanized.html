@@ -26441,7 +26441,6 @@ commonBv.globals = {
     @apply(--layout-around-justified);
     text-align: center;
   }
-
 </style>
 <template>
   <div id="loading" hidden$="{{!loadingShown}}">
@@ -41986,6 +41985,28 @@ commonBv.interventions = {
     _autocompleteUrl: function() {
       return this.getEp('locationsAutocomplete').url;
     },
+    validReport: function() {
+      // make sure location is selected and location ID is present
+      // TODO: make sure location is valid according to the latest locations
+      var valid = {
+        status: true,
+        errors: []
+      };
+      if ((!this.selectedLocationReport) || (!this.selectedLocationReport.id)) {
+        valid.status = false;
+        valid.errors.push({
+          'location': 'Valid location not selected'
+        });
+      }
+      // console.log(this.selectedNumberResult, this.selectedNumberResult.total);
+      if (isNaN(this.selectedNumberResult.total) || (this.selectedNumberResult.total === '')) {
+        valid.status = false;
+        valid.errors.push({
+          'number': 'Valid total measurement is needed'
+        });
+      }
+      return valid;
+    },
     getReport: function() {
       return {
         location: this.selectedLocationReport,
@@ -42545,6 +42566,12 @@ commonBv.interventions = {
       var myReq = this.$.ajaxPost;
       //TODO: Validate
       
+      var valid = this.$.indicator.validReport();
+      // console.log(valid);
+      if (valid.status !== true){
+        app.$.alert.showText('One or more values selected is incomplete');
+        return;
+      }
       var myRep = this.$.indicator.getReport();
       // console.log(myRep);
       myReq.body = {
@@ -43444,6 +43471,7 @@ commonBv.interventions = {
       
     },
     _submitReport: function() {
+      var error = false;
       var myReq = this.$.ajaxPost;
       var tf = this.$.timeFrame;
       var body = [];
@@ -43451,7 +43479,13 @@ commonBv.interventions = {
       console.log(inds);
 
       inds.forEach(function(el) {
-        console.log(el);
+        console.log('Checking indicator: ', el);
+        var valid = el.validReport();
+        console.log(valid);
+        if (valid.status !== true){
+          error = valid;
+          return;
+        }
         var rep = el.getReport();
         body.push({
           'result_chain': el.rc.id,
@@ -43465,6 +43499,10 @@ commonBv.interventions = {
         });
 
       });
+      if (error) {
+        app.$.alert.showText('One or more values selected is incomplete');
+        return;
+      }
       // console.log(myRep);
       myReq.body = body;
       myReq.method = 'POST';
