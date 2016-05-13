@@ -413,9 +413,9 @@
       console.log(inds);
 
       inds.forEach(function(el) {
-        console.log('Checking indicator: ', el);
+        // console.log('Checking indicator: ', el);
         var valid = el.validReport();
-        console.log(valid);
+        // console.log(valid);
         if (valid.status !== true){
           error = valid;
           return;
