@@ -25836,12 +25836,12 @@ commonBv.globals = {
       }
     },
     _startLoading: function() {
-      console.log('ajax-startloading');
+      // console.log('ajax-startloading');
       app.$.loading.loadingText = 'Loading...';
       app.$.loading.show();
     },
     _stopLoading: function() {
-      console.log('ajax-stoploading');
+      // console.log('ajax-stoploading');
       app.$.loading.hide();
     },
     handleError: function(event, error){
@@ -40201,7 +40201,7 @@ commonBv.globals = {
       this.interventions = rsp.detail;
     },
     _updateInterventions: function() {
-      console.log('Interventions updated woo');
+      // console.log('Interventions updated woo');
     }
   });
 })();
@@ -41920,7 +41920,7 @@ commonBv.interventions = {
             
             <value-breakdown class="reportInput" id="valBreakdown" repres="{{selectedNumberResult}}" disaggregation="[[rc.disaggregation]]"></value-breakdown><span>&nbsp;</span>
             <div class="narativeReport">
-              <paper-textarea value="{{selectedRemarks}}" label="Optional Narrative (this text area grows as you type)"></paper-textarea>
+              <paper-textarea value="{{selectedRemarks}}" label="Optional Narrative (this text area grows as you type)" maxlength="3000"></paper-textarea>
             </div>
           </div>
         </div>
@@ -42181,11 +42181,7 @@ commonBv.interventions = {
 
   <h3>Indicators</h3>
   <paper-material elevation="1">
-  <div class="reportButtons">
-    <paper-button raised="" class$="{{_reportButton(reportingActive)}}" on-tap="_toggleReport">
-      <iron-icon icon="{{_reportIcon(reportingActive)}}"></iron-icon>Report
-    </paper-button>
-  </div>
+  
   <div hidden$="[[reportingActive]]">
     <timeframe-picker label="Reporting Period" id="timeFrame"></timeframe-picker>
   </div>
@@ -42222,6 +42218,7 @@ commonBv.interventions = {
   Polymer({
     is: 'intervention-details',
     behaviors: [commonBv.utils, commonBv.interventions, commonBv.globals],
+    observers: ['_updateInterventions(interventions.*)'],
     properties: {
       selectedTab: {
         type: Number,
@@ -42271,6 +42268,12 @@ commonBv.interventions = {
         this.reportingActive = true;
         this.intervention = this._getIntervention(this.interventionId);
         //this.$.interventionData.interventionId = this.interventionId;
+      }
+    },
+    _updateInterventions: function() {
+      if (this.intervention){
+        // console.log('update intervetnions called');
+        this.intervention = this._getIntervention(this.interventionId);
       }
     },
     _toggleReport: function() {

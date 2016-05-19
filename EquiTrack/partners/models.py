@@ -1384,7 +1384,7 @@ class IndicatorReport(TimeStampedModel, TimeFramedModel):
 
     # Metadata
     #  - Remarks, Report Status
-    remarks = models.TextField(blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)  # TODO: set max_length property
     report_status = models.CharField(choices=STATUS_CHOICES, default=STATUS_CHOICES.ontrack, max_length=15)
 
 
