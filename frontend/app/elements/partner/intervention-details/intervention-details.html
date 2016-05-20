@@ -173,7 +173,7 @@
   <h3>Details</h3>
   <paper-material elevation="1">
     <p>
-      <span class="intLabel">PCA number:</span> {{intervention.pca_number}}
+      <span class="intLabel">PD number:</span> {{intervention.pca_number}}
     </p>
     <p>
       <span class="intLabel">Initiated:</span> {{dateFormat(intervention.initiation_date, 'LL')}}, 
@@ -181,8 +181,8 @@
       <span class="intLabel">Reviewed</span> : {{dateFormat(intervention.review_date, 'LL')}}
     </p>
     <p>
-      <span class="intLabel">Total Cash:</span> {{intervention.total_cash}}
-      <span class="intLabel">Partner Contribution:</span> {{intervention.partner_contribution_budget}}
+      <span class="intLabel">Total Budget:</span> {{intervention.total_budget}}
+      <!-- <span class="intLabel">Partner Contribution:</span> {{intervention.partner_contribution_budget}} -->
     </p>
   </paper-material>
 
