@@ -59,11 +59,16 @@
       this.alertText = alertText;
       this.show();
     },
+    showSuccess: function(alertText){
+      this.alertTitle = 'Success';
+      this.showText(alertText);
+    },
     dismissDialog: function(event) {
       // if (event.detail.confirmed) {
       //   // do something if confirmed
       // }
       this.hide();
+      this.alertTitle = 'Warning';
       event.stopPropagation();
     }
   });

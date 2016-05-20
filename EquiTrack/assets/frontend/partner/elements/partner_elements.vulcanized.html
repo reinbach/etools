@@ -26542,11 +26542,16 @@ commonBv.globals = {
       this.alertText = alertText;
       this.show();
     },
+    showSuccess: function(alertText){
+      this.alertTitle = 'Success';
+      this.showText(alertText);
+    },
     dismissDialog: function(event) {
       // if (event.detail.confirmed) {
       //   // do something if confirmed
       // }
       this.hide();
+      this.alertTitle = 'Warning';
       event.stopPropagation();
     }
   });
@@ -43481,9 +43486,8 @@ commonBv.interventions = {
       return this.getEp('locationsAutocomplete').url;
     },
     handleSubmitResponse: function(rsp){
-      app.$.alert.showText('Report submitted');
+      app.$.alert.showSuccess('Report submitted');
       console.log('handling submit', rsp.detail);
-      
     },
     _submitReport: function() {
       var error = false;
