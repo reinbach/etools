@@ -23,6 +23,7 @@ from .views import (
     UserDashboardView,
     CmtDashboardView,
     HACTDashboardView,
+    HACTDashboardExportViewSet,
     PartnershipsView,
 )
 from locations.views import (
@@ -103,6 +104,7 @@ urlpatterns = patterns(
     url(r'^map/$', login_required(MapView.as_view()), name='map'),
     url(r'^cmt/$', login_required(CmtDashboardView.as_view()), name='cmt'),
     url(r'^hact/$', login_required(HACTDashboardView.as_view()), name='hact_dashboard'),
+    url(r'^hact/export/$', login_required(HACTDashboardExportViewSet.as_view()), name='hact_export'),
 
     url(r'^locations/', include('locations.urls')),
     url(r'^management/', include('management.urls')),

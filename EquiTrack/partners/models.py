@@ -324,6 +324,7 @@ class PartnerOrganization(AdminURLMixin, models.Model):
         ]
         return len(follow_ups)
 
+    @property
     def audits(self):
         return self.assessments.filter(type=u'Scheduled Audit report').count()
 

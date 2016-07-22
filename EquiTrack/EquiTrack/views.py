@@ -1,5 +1,6 @@
 __author__ = 'jcranwellward'
 import datetime
+import tablib
 
 from django.views.generic import TemplateView
 from django.db.models import Q
@@ -10,6 +11,9 @@ from reports.models import Sector, ResultStructure, Indicator
 from locations.models import CartoDBTable, GatewayType, Governorate, Region
 from funds.models import Donor
 from trips.models import Trip, ActionPoint
+from django.views.generic import ListView
+from django.http import HttpResponse
+from import_export.formats import base_formats
 
 
 class MainView(TemplateView):
@@ -225,3 +229,64 @@ class HACTDashboardView(TemplateView):
                 ]
             ).distinct()
         }
+
+
+class HACTDashboardExportViewSet(ListView):
+    model = PartnerOrganization
+
+    def get(self, request, *args, **kwargs):
+        queryset = PartnerOrganization.objects.filter(
+                documents__status__in=[
+                    PCA.ACTIVE,
+                    PCA.IMPLEMENTED
+                ]
+            ).distinct()
+
+        data = tablib.Dataset()
+        data.headers = [
+            'Implementing Partner (IP) name',
+            'Partner Type',
+            'Shared IP?',
+            'Micro assessment - Planned cash transfers (current year)',
+            'Micro assessment - To be done?',
+            'Cash transfers - Total (current CP cycle, USS$)',
+            'Cash transfers - Actual, USS$',
+            'Risk Rating',
+            'Programmatic visits - Planned',
+            'Programmatic visits - MR adjusted',
+            'Programmatic visits - Done',
+            'Spot checks - MR adjusted',
+            'Spot checks - Done',
+            'Audits - MR',
+            'Audits - Done',
+            'Flags for follow-up?'
+        ]
+
+        for row in queryset:
+            reqs = row.hact_min_requirements
+            data.append([
+                row.name,
+                row.partner_type,
+                row.shared_partner,
+                row.planned_cash_transfers,
+                row.micro_assessment_needed,
+                row.total_cash_transferred,
+                row.actual_cash_transferred,
+                row.rating,
+                row.planned_visits,
+                reqs['programme_visits'],
+                row.programmatic_visits,
+                reqs['spot_checks'],
+                row.spot_checks,
+                reqs['audits'],
+                row.audits,
+                row.follow_up_flags
+            ])
+
+        file_format = base_formats.XLS()
+        response = HttpResponse(
+            file_format.export_data(data),
+            content_type='application/application/ms-excel',
+        )
+        response['Content-Disposition'] = 'attachment; filename=hact_dashboard.xls'
+        return response
