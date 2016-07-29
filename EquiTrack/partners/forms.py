@@ -293,7 +293,7 @@ class AgreementForm(UserGroupForm):
 
     ERROR_MESSAGES = {
          'end_date': 'End date must be greater than start date',
-         'start_date_val': 'Start date must be greater than laatest of signed by partner/unicef date',
+         'start_date_val': 'Start date must be greater than latest of signed by partner/unicef date',
      }
 
     user_field = u'signed_by'

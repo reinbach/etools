@@ -1246,13 +1246,17 @@ class AgreementAmendmentLog(TimeStampedModel):
         type = models.CharField(
             max_length=50,
             choices=Choices(
+                'Additional Clauses',
+                'Agreement Changes',
                 'Authorised Officers',
                 'Banking Info',
-                'Agreement Changes',
-                'Additional Clauses',
+                'Partner Name',
+                'Programme Cycle Extension',
+                'Extend Duration',
             ))
         amended_at = models.DateField(null=True, verbose_name='Signed At')
         amendment_number = models.IntegerField(default=0)
+        amendment_description = models.TextField(null=True)
         status = models.CharField(
             max_length=32L,
             blank=True,

@@ -622,6 +622,7 @@ class AgreementAmendmentLogInlineAdmin(admin.TabularInline):
         'status',
         'amended_at',
         'amendment_number',
+        'amendment_description',
     )
     readonly_fields = [
         'amendment_number',
