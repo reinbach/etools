@@ -52,7 +52,8 @@ from .models import (
     GwPCALocation,
     PartnerStaffMember,
     ResultChain,
-    IndicatorReport
+    IndicatorReport,
+    AgreementAmendmentLog,
 )
 from reports.models import ResultStructure
 from rest_framework import status
@@ -65,6 +66,7 @@ class PcaPDFView(PDFTemplateView):
     def get_context_data(self, **kwargs):
         agr_id = self.kwargs.get('agr')
         agreement = Agreement.objects.get(id=agr_id)
+        # amendments = AgreementAmendmentLog.objects.get(agreement=agreement)
         officers = agreement.authorized_officers.all()
         officers_list = []
         for officer in officers:
@@ -78,6 +80,7 @@ class PcaPDFView(PDFTemplateView):
             pagesize="Letter",
             title="Partnership",
             agreement=agreement,
+            amendments = agreement.amendments_log.all(),
             bank_details=agreement.bank_details.all(),
             cp=ResultStructure.current(),
             auth_officers=officers_list,

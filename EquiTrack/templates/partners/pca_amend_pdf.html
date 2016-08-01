@@ -1,0 +1,118 @@
+{% extends "easy_pdf/base.html" %}
+{% load humanize %}
+
+{% block style_base %}
+    {% comment %}
+        See DEFAULT_CSS in https://github.com/chrisglass/xhtml2pdf/blob/master/xhtml2pdf/default.py
+        for base style.
+    {% endcomment %}
+
+    {% block layout_style %}
+        <style type="text/css">
+            @page {
+                size: {{ pagesize|default:"letter" }};
+                margin-left: 2.0cm;
+                margin-right: 2.0cm;
+                margin-top: 1.8cm;
+                margin-bottom: 1.8cm;
+                @frame header {
+                -pdf-frame-content: page-header;
+                margin-top: 0cm;
+                margin-right: 0mm;
+                margin-bottom: 0.3cm;
+                margin-left: 0cm;
+                background-color: #0099ff;
+                height: 2cm;
+            }
+            @frame footer_frame {
+                /* Static frame */
+            -pdf-frame-content:footer_content;
+            left: 50pt; width: 512pt; top: 772pt; height: 20pt;
+            }
+
+            }
+        </style>
+    {% endblock %}
+    {% block extra_style %}
+        <style type="text/css">
+            #page-header {
+            {#            background-color: #0099ff;#}{#            color: #ffffff;#}{#            line-height: 0.5cm;#}
+            }
+
+            {#        #page-footer{#}
+            {#            -pdf-frame-content: page-footer;#}
+            {#            bottom: 0cm;#}
+            {#            margin-left: 1cm;#}
+            {#            margin-right: 1cm;#}
+            {#            color: #0099ff;#}
+            {#            line-height: 1.0cm;#}
+            {#            background-color: #0099ff;#}
+            {#        }#}
+            .details div {
+            {#            background-color: #f1f1f1;#} border-radius: 25px;
+                border: 2px solid #f1f1f1;
+                padding: 20px;
+                width: 200px;
+                height: 150px;
+            }
+
+            ul {
+                list-style-type: none;
+            }
+
+            #content {
+                font-family: "Times New Roman";
+                font-size: 12pt;
+            }
+
+            .page-break {
+                page-break-after: always;
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <div id="title" style="text-align: center; padding-top: 15px">
+            <div style="text-align: right"><b><u>AMMENDMENT #: {{ ammednments.id }}</u></b></div>
+            <div style="text-align: right"><b><u>TO</u></b></div>
+            <div style="font-size: 16pt"><b>PROGRAMME COOPERATION AGREEMENT {{ agreement.agreement_number }}</b></div>
+            <div><b>BETWEEN</b></div>
+            <div><b>{{ agreement.partner|upper }}</b></div>
+            <div><b>AND THE</b></div>
+            <div><b>UNITED NATIONS CHILDREN'S FUND</b></div>
+
+            <div style="padding-top: 30px">
+                This Amendment Number [..] to the Programme Cooperation Agreement (“PCA”) relating to the UNICEF Country Programme for [long form name of country] is made between the United Nations Children’s Fund and [Full name of Implementing Partner].
+            </div>
+            <div style="padding-top: 10px">
+                Whereas under Article 20 of the General Terms and Conditions for Programme Cooperation Agreements of the PCA dated […], the Parties may modify or change this PCA by written amendment, and the Parties now wish to amend the PCA under the following terms and conditions:
+            </div>
+            <div style="padding-top: 10px">
+                {{ ammmendments.amendment_description }}
+            </div>
+            <div style="padding-top: 10px">
+                IN WITNESS WHEREOF, the undersigned, duly authorized by the respective Parties, have signed this Amendment.
+            </div>
+
+            <div style="padding-top: 10px">
+                <table>
+                    <tr>
+                        <td><b>For the Implementing PArtner:</b></td>
+                        <td><b>For the United Nations Children's Fund</b></td>
+                    </tr>
+                    <tr>
+                    {% for officer in auth_officers %}
+                    <div>Full name: {{ officer.first_name }} {{ officer.last_name }} </div>
+                    <div>Title: {{ officer.title }}</div>
+                    <div>Sample signature: ____________________________</div>
+                {% endfor %}
+                        <td>Name: </td>
+                    </tr>
+                </table>
+                IN WITNESS WHEREOF, the undersigned, duly authorized by the respective Parties, have signed this Amendment.
+            </div>
+        </div>
+    </div>
+{% endblock %}
