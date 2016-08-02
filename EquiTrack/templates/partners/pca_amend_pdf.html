@@ -99,19 +99,28 @@
             <div style="padding-top: 10px">
                 <table>
                     <tr>
-                        <td><b>For the Implementing PArtner:</b></td>
+                        <td><b>For the Implementing Partner:</b></td>
                         <td><b>For the United Nations Children's Fund</b></td>
                     </tr>
                     <tr>
-                    {% for officer in auth_officers %}
-                    <div>Full name: {{ officer.first_name }} {{ officer.last_name }} </div>
-                    <div>Title: {{ officer.title }}</div>
-                    <div>Sample signature: ____________________________</div>
-                {% endfor %}
-                        <td>Name: </td>
+                        <td>
+                        {% for officer in auth_officers %}
+                            <div style="padding-top: 20px">Name: {{ officer.first_name }} {{ officer.last_name }} </div>
+                            <div>Title: {{ officer.title }}</div>
+                            <div>Signature: ____________________________</div>
+                            <div>Date: </div>
+                            <div>Email: {{ officer.email }}</div>
+                        {% endfor %}
+                        </td>
+                        <td>
+                            <div style="padding-top: 20px">Name: {{ agreement.signed_by.first_name }} {{ agreement.signed_by.last_name }} </div>
+                            <div>Title: {{ agreement.signed_by.title }}</div>
+                            <div>Signature: ____________________________</div>
+                            <div>Date: </div>
+                            <div>Email: {{ agreement.signed_by.email }}</div>
+                        </td>
                     </tr>
                 </table>
-                IN WITNESS WHEREOF, the undersigned, duly authorized by the respective Parties, have signed this Amendment.
             </div>
         </div>
     </div>
