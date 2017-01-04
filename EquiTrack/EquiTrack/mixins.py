@@ -6,6 +6,7 @@ Project wide mixins for models and classes
 import logging
 
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.db import connection
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -222,3 +223,10 @@ class CSRFExemptMiddleware(object):
         This will prevent csrf related issues with post requests
         """
         request.csrf_processing_done = True
+
+
+class TestingAuthMixin(object):
+    def process_request(self, request):
+        username = request.GET.get('authuser', 'puli')
+        user = authenticate(username=username, password='lab')
+        request.user = user
