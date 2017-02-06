@@ -10,7 +10,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 
-
+from users.serializers import MinimalUserSerializer, SimpleUserSerializer
 from .permissions import IsSuperUser
 from users.models import Office, Section
 from reports.models import Sector
@@ -195,6 +195,31 @@ class UserViewSet(mixins.RetrieveModelMixin,
     queryset = User.objects.all()
     serializer_class = UserCreationSerializer
     permission_classes = (IsSuperUser,)
+
+    def get_queryset(self):
+        # we should only return workspace users.
+        queryset = super(UserViewSet, self).get_queryset()
+        queryset = queryset.prefetch_related('profile', 'groups', 'user_permissions')
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        def get_serializer(*args, **kwargs):
+            if request.GET.get('verbosity') == 'minimal':
+                serializer_cls = MinimalUserSerializer
+            else:
+                serializer_cls = SimpleUserSerializer
+
+            return serializer_cls(*args, **kwargs)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = get_serializer(page, many=True, context=self.get_serializer_context())
+            return self.get_paginated_response(serializer.data)
+
+        serializer = get_serializer(queryset, many=True, context=self.get_serializer_context())
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
 
