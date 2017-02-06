@@ -1,5 +1,7 @@
 __author__ = 'achamseddine'
 
+import json
+
 from rest_framework import status
 
 from EquiTrack.factories import UserFactory
@@ -10,7 +12,7 @@ class TestUserViews(APITenantTestCase):
 
     def setUp(self):
         self.unicef_staff = UserFactory(is_staff=True)
-        # self.unicef_superuser = UserFactory(is_superuser=True)
+        self.unicef_superuser = UserFactory(is_superuser=True)
 
     def test_api_users_list(self):
         response = self.forced_auth_req('get', '/api/users/', user=self.unicef_staff)
@@ -31,3 +33,11 @@ class TestUserViews(APITenantTestCase):
         response = self.forced_auth_req('get', '/api/sections/', user=self.unicef_staff)
 
         self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_list_endpoint(self):
+        response = self.forced_auth_req('get', '/api/users/', data={'verbosity': 'minimal'}, user=self.unicef_superuser)
+        response_json = json.loads(response.rendered_content)
+
+        self.assertEqual(len(response_json), 2)
+        first_data = response_json[0]
+        self.assertKeysIn(['first_name', 'last_name', 'name', 'id'], first_data, exact=True)
