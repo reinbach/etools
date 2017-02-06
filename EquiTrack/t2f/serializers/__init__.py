@@ -480,5 +480,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super(InvoiceSerializer, self).to_representation(instance)
-        ret['amount'] = Decimal(ret['amount']).quantize(Decimal('1.'+'0'*instance.currency.decimal_places))
+        if instance.currency:
+            ret['amount'] = Decimal(ret['amount']).quantize(Decimal('1.'+'0'*instance.currency.decimal_places))
         return ret

@@ -56,6 +56,12 @@ class InvoiceEndpoints(APITenantTestCase):
                          'message', 'vision_fi_id', 'items']
         self.assertKeysIn(expected_keys, response_json)
 
+    def test_sorting(self):
+        # Check for 500
+        response = self.forced_auth_req('get', reverse('t2f:invoices:list'),
+                                        data={'sort_by': 'trip_reference_number'},
+                                        user=self.unicef_staff)
+
     def test_filtering(self):
         response = self.forced_auth_req('get', reverse('t2f:invoices:list'),
                                         data={'f_vendor_number': '12',

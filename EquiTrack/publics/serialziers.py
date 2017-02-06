@@ -20,7 +20,7 @@ class DSARegionSerializer(serializers.ModelSerializer):
         model = DSARegion
         fields = ('id', 'country', 'area_name', 'area_code', 'dsa_amount_usd', 'dsa_amount_60plus_usd',
                   'dsa_amount_local', 'dsa_amount_60plus_local', 'room_rate', 'finalization_date', 'eff_date',
-                  'unique_id', 'unique_name', 'long_name')
+                  'unique_id', 'unique_name', 'long_name', 'label')
 
 
 class BusinessRegionSerializer(serializers.ModelSerializer):
