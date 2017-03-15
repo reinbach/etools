@@ -40,7 +40,6 @@ def transition_to_active(i):
     for sectorlocation in i.sector_locations.all():
         if not sector_location_valid(sectorlocation):
             raise TransitionError(['Sector and locations are required if Intervention status is ACTIVE or IMPLEMENTED.'])
-
     return True
 
 def transition_to_implemented(i):
@@ -134,6 +133,11 @@ def amendments_valid(i):
             return False
     return True
 
+def dates_agreement_valid(i):
+    if i.agreement.end < i.start < i.agreement.start or i.agreement.start > i.end > i.agreement.end:
+        return False
+    return True
+
 
 class InterventionValid(CompleteValidation):
 
@@ -147,6 +151,7 @@ class InterventionValid(CompleteValidation):
         document_type_pca_valid,
         document_type_ssfa_valid,
         amendments_valid,
+        dates_agreement_valid,
     ]
 
     VALID_ERRORS = {
@@ -156,6 +161,7 @@ class InterventionValid(CompleteValidation):
         'document_type_pca_valid': 'Document type must be PD or SHPD in case of agreement is PCA.',
         'document_type_ssfa_valid': 'Document type must be SSFA in case of agreement is SSFA.',
         'amendments_valid': 'Type, signed date, and signed amendment are required in Amendments.',
+        'dates_agreement_valid': 'Start or End dates are not within Agreement date range',
     }
 
     def state_suspended_valid(self, intervention, user=None):

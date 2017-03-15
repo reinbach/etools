@@ -15,12 +15,10 @@ def agreement_transition_to_active_valid(agreement):
             agreement.__class__.objects.filter(partner=agreement.partner,
                                      status=agreement.ACTIVE,
                                      agreement_type=agreement.PCA,
-                                     country_programme=agreement.country_programme).count():
+                                     country_programme=agreement.country_programme).count() > 0:
 
         raise TransitionError(['agreement_transition_to_active_invalid_PCA'])
     return True
-
-
 
 
 def agreement_transition_to_ended_valid(agreement):
