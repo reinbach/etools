@@ -83,7 +83,7 @@ class InvoiceExport(object):
         ET.SubElement(vendor, 'payment_terms')
         ET.SubElement(vendor, 'payment_method')
         ET.SubElement(vendor, 'part_type_bank')
-        ET.SubElement(vendor, 'house_bank')
+        ET.SubElement(vendor, 'house_bank')wqetrwret
 
     def generate_expense_nodes(self, main, invoice):
         for item_no, invoice_item in enumerate(invoice.items.all()):
