@@ -665,3 +665,29 @@ class TravelDetails(APITenantTestCase):
         new_activity = response_json['activities'][0]
 
         self.assertEqual(new_activity['government_partnership'], government_partnership.id)
+
+    def test_expense_currency_change(self):
+        currency = CurrencyFactory(name='United States Dollar', code='USD')
+        another_currency = CurrencyFactory(name='Hungarian Forint', code='HUF')
+        expense_type = ExpenseTypeFactory()
+
+        data = {'cost_assignments': [],
+                'deductions': [],
+                'traveler': self.traveler.id,
+                'ta_required': True,
+                'supervisor': self.unicef_staff.id,
+                'expenses': [{'amount': '120',
+                              'type': expense_type.id,
+                              'account_currency': currency.id,
+                              'document_currency': currency.id}]}
+        response = self.forced_auth_req('post', reverse('t2f:travels:list:index'), data=data, user=self.unicef_staff)
+        response_json = json.loads(response.rendered_content)
+
+        data = response_json
+        data['expenses'][0]['document_currency'] = another_currency.id
+        data['expenses'][0]['account_currency'] = another_currency.id
+        response = self.forced_auth_req('patch', reverse('t2f:travels:details:index',
+                                                         kwargs={'travel_pk': response_json['id']}),
+                                        data=data, user=self.unicef_staff)
+        response_json = json.loads(response.rendered_content)
+        self.assertEqual(response_json, {'expenses': ['Expense currency cannot be changed.']})

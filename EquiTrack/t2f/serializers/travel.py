@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields.related import ManyToManyField
 from django.utils.functional import cached_property
 from django.utils.itercompat import is_iterable
-from rest_framework import serializers, ISO_8601
+from django.utils.translation import ugettext
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from publics.models import AirlineCompany
@@ -22,11 +23,13 @@ User = get_user_model()
 
 iteneraryItemSortKey = operator.attrgetter('departure_date')
 
+
 def order_iteneraryitems(instance, items):
     # ensure iteneraryitems are ordered by `departure_date`
     if (items is not None) and (len(items) > 1):
         instance.set_iteneraryitem_order([i.pk for i in
             sorted(items, key=iteneraryItemSortKey)])
+
 
 class LowerTitleField(serializers.CharField):
     def to_representation(self, value):
@@ -123,6 +126,7 @@ class IteneraryItemSerializer(PermissionBasedModelSerializer):
         model = IteneraryItem
         fields = ('id', 'origin', 'destination', 'departure_date', 'arrival_date', 'dsa_region', 'overnight_travel',
                   'mode_of_travel', 'airlines')
+
 
 class ExpenseSerializer(PermissionBasedModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -285,6 +289,17 @@ class TravelDetailsSerializer(serializers.ModelSerializer):
             if date < current_date:
                 raise ValidationError('Itinerary items have to be ordered by date')
             current_date = date
+
+        return value
+
+    def validate_expenses(self, value):
+        if not self.instance:
+            return value
+
+        existing_expenses = {e.type: e.currency for e in self.instance.expenses.all()}
+        for expense in value:
+            if expense['document_currency'] != existing_expenses[expense['type']]:
+                raise ValidationError(ugettext('Expense currency cannot be changed.'))
 
         return value
 

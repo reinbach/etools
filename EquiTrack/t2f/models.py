@@ -473,8 +473,17 @@ class Expense(models.Model):
     travel = models.ForeignKey('Travel', related_name='expenses')
     type = models.ForeignKey('publics.TravelExpenseType', related_name='+', null=True)
     document_currency = models.ForeignKey('publics.Currency', related_name='+', null=True)
+    # TODO remove account currency
     account_currency = models.ForeignKey('publics.Currency', related_name='+', null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=4, null=True)
+
+    @property
+    def currency(self):
+        return self.document_currency
+
+    @currency.setter
+    def currency(self, value):
+        self.document_currency = value
 
 
 class Deduction(models.Model):
