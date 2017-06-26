@@ -91,7 +91,11 @@ class ActionPointSerializer(serializers.ModelSerializer):
                   'assigned_by_name', 'person_responsible_name', 'trip_id')
 
     def validate_due_date(self, value):
-        if value.date() < datetime.utcnow().date():
+        if self.instance:
+            existing_due_date = self.instance.due_date.date()
+        else:
+            existing_due_date = None
+        if (not existing_due_date or existing_due_date != value.date()) and value.date() < datetime.utcnow().date():
             raise ValidationError('Due date cannot be earlier than today.')
         return value
 
@@ -178,7 +182,7 @@ class TravelActivitySerializer(PermissionBasedModelSerializer):
 
     class Meta:
         model = TravelActivity
-        fields = ('id', 'travel_type', 'partner', 'partnership', 'government_partnership', 'result', 'locations',
+        fields = ('id', 'travel_type', 'partner', 'partnership', 'result', 'locations',
                   'primary_traveler', 'date', 'is_primary_traveler')
 
     def validate(self, attrs):
@@ -187,21 +191,11 @@ class TravelActivitySerializer(PermissionBasedModelSerializer):
                 if not attrs.get('primary_traveler'):
                     raise ValidationError({'primary_traveler': serializers.Field.default_error_messages['required']})
 
-        if attrs.get('partnership') and attrs.get('government_partnership'):
-            raise ValidationError('Partnership and government partnership cannot be set at the same time')
-
-        if 'partnership' in attrs:
-            attrs['government_partnership'] = None
-        elif 'government_partnership' in attrs:
-            attrs['partnership'] = None
-
         partner = attrs.get('partner', getattr(self.instance, 'partner', None))
         travel_type = attrs.get('travel_type', getattr(self.instance, 'travel_type', None))
 
-        if partner and travel_type and \
-                partner.partner_type == PartnerType.GOVERNMENT and \
-                (travel_type == TravelType.PROGRAMME_MONITORING or
-                travel_type == TravelType.SPOT_CHECK) and \
+        if partner and partner.partner_type == PartnerType.GOVERNMENT and \
+                travel_type in [TravelType.PROGRAMME_MONITORING, TravelType.SPOT_CHECK] and \
                 'result' not in attrs:
             raise ValidationError({'result': serializers.Field.default_error_messages['required']})
 
@@ -344,6 +338,10 @@ class TravelDetailsSerializer(PermissionBasedModelSerializer):
             if travel_activity_data.get('is_primary_traveler'):
                 travel_activity_data['primary_traveler'] = traveler_id
 
+        # Align start and end dates based on itinerary
+        if data.get('itinerary', []):
+            data = self.align_dates_to_itinerary(data)
+
         return super(TravelDetailsSerializer, self).to_internal_value(data)
 
     def to_representation(self, instance):
@@ -357,26 +355,22 @@ class TravelDetailsSerializer(PermissionBasedModelSerializer):
 
         return data
 
-    # -------- Create and update methods --------
-    def align_dates_to_itinerary(self, validated_data):
+    def align_dates_to_itinerary(self, data):
         '''Updates travel start and end date based on itineraries'''
-        itinerary = validated_data.get('itinerary', [])
+        itinerary = data.get('itinerary', [])
         departures = []
         arrivals = []
         for item in itinerary:
             departures.append(item['departure_date'])
             arrivals.append(item['arrival_date'])
 
-        validated_data['start_date'] = min(departures)
-        validated_data['end_date'] = max(arrivals)
+        data['start_date'] = min(departures)
+        data['end_date'] = max(arrivals)
 
-        return validated_data
+        return data
 
+    # -------- Create and update methods --------
     def create(self, validated_data):
-        # Align start and end dates based on itinerary
-        if validated_data.get('itinerary', []):
-            validated_data = self.align_dates_to_itinerary(validated_data)
-
         itinerary = validated_data.pop('itinerary', [])
         expenses = validated_data.pop('expenses', [])
         deductions = validated_data.pop('deductions', [])
@@ -425,10 +419,6 @@ class TravelDetailsSerializer(PermissionBasedModelSerializer):
         return new_models
 
     def update(self, instance, validated_data, model_serializer=None):
-        # Align start and end dates based on itinerary
-        if validated_data.get('itinerary', []):
-            validated_data = self.align_dates_to_itinerary(validated_data)
-
         model_serializer = model_serializer or self
 
         related_attributes = {}
@@ -530,16 +520,20 @@ class TravelActivityByPartnerSerializer(serializers.ModelSerializer):
     primary_traveler = serializers.CharField(source='primary_traveler.get_full_name')
     reference_number = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
-
-    def get_status(self, obj):
-        return obj.travels.first().status
-
-    def get_reference_number(self, obj):
-        return obj.travels.first().reference_number
+    trip_id = serializers.SerializerMethodField()
 
     class Meta:
         model = TravelActivity
-        fields = ("primary_traveler", "travel_type", "date", "locations", "reference_number", "status",)
+        fields = ('primary_traveler', 'travel_type', 'date', 'locations', 'reference_number', 'status', 'trip_id')
+
+    def get_status(self, obj):
+        return obj.travels.get(traveler=obj.primary_traveler).status
+
+    def get_reference_number(self, obj):
+        return obj.travels.get(traveler=obj.primary_traveler).reference_number
+
+    def get_trip_id(self, obj):
+        return obj.travels.get(traveler=obj.primary_traveler).id
 
 
 class CloneOutputSerializer(TravelDetailsSerializer):

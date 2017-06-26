@@ -271,13 +271,17 @@ class Travel(models.Model):
 
         return True
 
-    def check_itinerary_count(self):
+    def validate_itinerary(self):
         if self.ta_required and self.itinerary.all().count() < 2:
             raise TransitionError(ugettext('Travel must have at least two itinerary item'))
+
+        if self.ta_required and self.itinerary.filter(dsa_region=None).exists():
+            raise TransitionError(ugettext('All itinerary items has to have DSA region assigned'))
+
         return True
 
     @transition(status, source=[PLANNED, REJECTED, SENT_FOR_PAYMENT, CANCELLED], target=SUBMITTED,
-                conditions=[check_itinerary_count, has_supervisor, check_pending_invoices, check_travel_count])
+                conditions=[validate_itinerary, has_supervisor, check_pending_invoices, check_travel_count])
     def submit_for_approval(self):
         self.submitted_at = now()
         if not self.first_submission_date:
@@ -445,7 +449,6 @@ class TravelActivity(models.Model):
     # Partnership has to be filtered based on partner
     # TODO: assert self.partnership.agreement.partner == self.partner
     partnership = models.ForeignKey('partners.Intervention', null=True, related_name='+')
-    government_partnership = models.ForeignKey('partners.GovernmentIntervention', null=True, related_name='+')
     result = models.ForeignKey('reports.Result', null=True, related_name='+')
     locations = models.ManyToManyField('locations.Location', related_name='+')
     primary_traveler = models.ForeignKey(User)
@@ -643,7 +646,7 @@ class ActionPoint(models.Model):
         url = 'https://{host}/t2f/action-point/{action_point_id}/'.format(host=settings.HOST,
                                                                           action_point_id=self.id)
 
-        context = Context({'travel': serializer.data,
+        context = Context({'action_point': serializer.data,
                            'url': url})
         html_content = render_to_string('emails/action_point_assigned.html', context)
 
